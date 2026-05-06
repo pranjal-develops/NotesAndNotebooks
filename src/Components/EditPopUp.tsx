@@ -30,7 +30,7 @@ const EditPopup: React.FC<EditPopupProps> = ({ note, onClose, onUpdate, onDelete
   const [isClosing, setIsClosing] = useState(false)
   const [showCanvas, setShowCanvas] = useState(note.drawingData ? true : false);
   const [color, setColor] = useState(note.color || 'transparent');
-  const [isPinned, setIsPinned] = useState(note.pinned || false);
+  const [pinned, setPinned] = useState(note.pinned || false);
 
 
   const canvasRef = useRef<CanvasHandle>(null);
@@ -38,16 +38,18 @@ const EditPopup: React.FC<EditPopupProps> = ({ note, onClose, onUpdate, onDelete
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const updatednote = { ...note, title, description, drawingData: showCanvas ? canvasRef.current?.getSaveData() : note.drawingData, color, isPinned };
-
+    const previousNotes = {...note};
+    const updatednote = { ...note, title, description, drawingData: showCanvas ? canvasRef.current?.getSaveData() : note.drawingData, color, pinned };
+    onUpdate(updatednote);
+    onClose(); // Close the popup after updating
+    
     try {
       const response = await axios.put(`http://localhost:8080/api/notes/${note.id}`, updatednote);
       console.log(response);
 
-      onUpdate(updatednote);
-      onClose(); // Close the popup after updating
     } catch (error) {
-      console.log(error);
+      console.log("Update failed reverting...",error);
+      onUpdate(previousNotes);
     }
   };
 
@@ -131,8 +133,8 @@ const EditPopup: React.FC<EditPopupProps> = ({ note, onClose, onUpdate, onDelete
             </div>
             <button
               type="button"
-              onClick={() => setIsPinned(!isPinned)}
-              className={`p-2 rounded-full transition-colors ${isPinned ? 'text-purple-600 bg-purple-50' : 'text-gray-400 hover:bg-gray-100'
+              onClick={() => setPinned(!pinned)}
+              className={`p-2 rounded-full transition-colors ${pinned ? 'text-purple-600 bg-purple-50' : 'text-gray-400 hover:bg-gray-100'
                 }`}
             >
               <BsPinAngleFill size={20} />

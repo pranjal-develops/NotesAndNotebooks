@@ -1,9 +1,14 @@
 import axios from 'axios'
 import React, { useState, useRef } from 'react'
 import { useDispatch } from 'react-redux'
-import { setAddNote } from '../store/slice/noteSlice';
+import { AddNoteFalse, setAddNote } from '../store/slice/noteSlice';
 import DrawingCanvas, {type CanvasHandle} from './Canvas';
 import { BsPinAngleFill } from 'react-icons/bs';
+import type { Note as note } from '../types';
+
+interface AddProps {
+  onAdd: (note: note, meta?: { tempId?: number; shouldRemove?: boolean }) => void;
+}
 
 const COLORS = [
   { name: 'Default', value: 'transparent' },
@@ -18,25 +23,40 @@ const COLORS = [
   { name: 'Pink', value: '#fdcfe8' },
 ];
 
-const Add = () => {
+const Add: React.FC<AddProps> = ({onAdd}) => {
   const dispatch = useDispatch();
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [isClosing, setIsClosing] = useState(false)
   const [showCanvas, setShowCanvas] = useState(false);
   const [color, setColor] = useState('transparent');
-  const [isPinned, setIsPinned] = useState(false);
+  const [pinned, setPinned] = useState(false);
 
   const canvasRef = useRef<CanvasHandle>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const tempId = -Date.now(); // Use negative IDs for temp notes to avoid collisions with real ones
     const drawingData = showCanvas ? canvasRef.current?.getSaveData() : null;
-    const newnote = { title, description, drawingData, color, isPinned };
+    const optimisticNote = { 
+      id: tempId, 
+      title, 
+      description, 
+      drawingData, 
+      color, 
+      pinned,
+      isOptimistic: true 
+    };
+    onAdd(optimisticNote);
+    closePopup();
     try {
-      await axios.post(`http://localhost:8080/api/notes`, newnote);
-      closePopup();
+      // Send to server WITHOUT the temp ID
+      const { id: _, ...noteDataWithoutId } = optimisticNote; 
+      const response = await axios.post(`http://localhost:8080/api/notes`, noteDataWithoutId);
+      // Swap temp note with real note from server (which has the real DB ID)
+      onAdd(response.data, { tempId });
     } catch (error) {
+      onAdd(optimisticNote, { shouldRemove: true });
       console.log(error);
     }
   };
@@ -44,7 +64,7 @@ const Add = () => {
   const closePopup = () => {
     setIsClosing(true)
     setTimeout(() => {
-      dispatch(setAddNote());
+      dispatch(AddNoteFalse());
       setIsClosing(false);
     }, 200);
   }
@@ -103,9 +123,9 @@ const Add = () => {
   </div>
   <button
     type="button"
-    onClick={() => setIsPinned(!isPinned)}
+    onClick={() => setPinned(!pinned)}
     className={`p-2 rounded-full transition-colors ${
-      isPinned ? 'text-purple-600 bg-purple-50' : 'text-gray-400 hover:bg-gray-100'
+      pinned ? 'text-purple-600 bg-purple-50' : 'text-gray-400 hover:bg-gray-100'
     }`}
   >
     <BsPinAngleFill size={20} />

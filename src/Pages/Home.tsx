@@ -44,13 +44,25 @@ function Home() {
   };
 
   const handleDelete = async (id: number) => {
+    const previousNotes = [...notes];
+    setnotes(notes.filter((note) => note.id !== id)); // Remove the deleted note from the state
     try {
       await axios.delete(`http://localhost:8080/api/notes/${id}`);
-      setnotes(notes.filter((note) => note.id !== id)); // Remove the deleted note from the state
     } catch (error) {
-      console.log(error);
+      console.log("Delete failed reverting UI",error);
+      setnotes(previousNotes);
     }
   };
+
+  const handleOptimisticAdd = (noteData: note, meta?: { tempId?: number; shouldRemove?: boolean }) => {
+  if (meta?.shouldRemove) {
+    setnotes(prev => prev.filter(n => n.id !== noteData.id));
+  } else if (meta?.tempId) {
+    setnotes(prev => prev.map(n => n.id === meta.tempId ? noteData : n));
+  } else {
+    setnotes(prev => [noteData, ...prev]);
+  }
+};
 
   return (
     <>
@@ -83,7 +95,7 @@ function Home() {
           onDelete={handleDelete}
         />
       )}
-      {addNote && <Add />}
+      {addNote && <Add onAdd={handleOptimisticAdd} />}
     </>
   );
 }

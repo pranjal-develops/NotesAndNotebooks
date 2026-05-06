@@ -1,9 +1,13 @@
 import React from 'react'
 import { BsPlusLg } from 'react-icons/bs'
+import { useDispatch } from 'react-redux'
+import { AddNoteTrue } from '../store/slice/noteSlice'
 
 const AddButton = () => {
+  const dispatch = useDispatch();
   return (
     <button 
+    onClick={() => dispatch(AddNoteTrue())}
   className="fixed bottom-6 right-6 md:bottom-10 md:right-10 
              w-14 h-14 md:w-16 md:h-16 
              rounded-full bg-purple-600 text-white 
