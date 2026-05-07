@@ -18,13 +18,22 @@ function Home() {
   const [loading, setLoading] = useState<boolean>(false);
   const [editingnote, setEditingnote] = useState<note | null>(null);
 
+    const [debouncedSearchText, setDebouncedSearchText] = useState(searchText);
+
+    useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchText]);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
         const response = await axios.get("http://localhost:8080/api/notes", {
           params: {
-            q: searchText,
+            q: debouncedSearchText,
           },
         });
         setnotes(response.data);
@@ -35,7 +44,12 @@ function Home() {
       }
     };
     fetchData();
-  }, [addNote, searchText]);
+  }, [addNote, debouncedSearchText]);
+
+    const filteredNotes = notes.filter(note => 
+    note.title.toLowerCase().includes(searchText.toLowerCase()) || 
+    note.description.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   const handleUpdate = (updatednote: note) => {
     setnotes(
@@ -76,7 +90,7 @@ function Home() {
             {/* <div className=" p-3 bg-[hsl(0,0%,95%)] rounded-3xl w-full mx-auto h-full"> */}
             {/* <div className=" p-3 bg-[hsl(0,0%,95%)] dark:bg-[hsl(0,0%,5%)] rounded-l-3xl w-full h-full"> */}
             <Notes
-              notes={notes}
+              notes={filteredNotes}
               loading={loading}
               setEditingnote={setEditingnote}
             />
