@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
 import Search from "./Search";
 import { GiHamburgerMenu } from "react-icons/gi";
+import {SetSideBarOpen} from "../store/slice/uiSlice"
+import {AddNoteTrue} from "../store/slice/noteSlice"
+import { useDispatch } from "react-redux";
 
 //  const toggleDarkMode = () =>{
 //     document.body.classList.toggle('dark-mode');
 //   };
-interface NavbarProps {
-  onAddNote: () => void,
-  onClk: ()=>void;
-}
 
-const Navbar: React.FC<NavbarProps> = ({ onAddNote,onClk }) => {
+const Navbar = () => {
+
+  const dispatch = useDispatch();
 
   const [isDark, setIsDark] = useState(() => {
     const currTheme = localStorage.getItem("theme") || "light";
@@ -32,22 +33,22 @@ const Navbar: React.FC<NavbarProps> = ({ onAddNote,onClk }) => {
   return (
     // <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
     // <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-black backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
-    <header className="sticky top-0 bg-transparent flex items-center justify-between px-6 py-4">
+    <header className="sticky top-0 bg-transparent flex items-center justify-between px-2 md:px-6 py-4">
       <div className="flex items-center gap-2">
-        <button className="cursor-pointer bg-zinc-100 rounded-xl p-2 hover:bg-white" onClick={onClk}><GiHamburgerMenu /></button>
-        <h3 className="text-xl font-bold bg-linear-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Note</h3>
+        <button className="cursor-pointer bg-zinc-100 rounded-xl p-2 hover:bg-white dark:bg-[hsl(0,0%,5%)] dark:hover:bg-[hsl(0,0%,10%)] z-50 mr-2" onClick={()=>dispatch(SetSideBarOpen())}><GiHamburgerMenu /></button>
+        <h3 className="hidden md:flex text-xl font-bold bg-linear-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Note</h3>
       </div>
       <Search/>
       <div className="flex items-center gap-3">
-        <button
-          onClick={onAddNote}
+        {/* <button
+          onClick={() => dispatch(AddNoteTrue())}
           className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-full hover:bg-purple-700 transition-colors shadow-lg shadow-purple-500/30 active:scale-95 animate-pulse"
         >
           Add Note
-        </button>
+        </button> */}
         <button
           onClick={toggleTheme}
-          className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 hover:dark:text-gray-100 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 hover:dark:bg-gray-700 rounded-full transition-all active:scale-95"
+          className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 hover:dark:text-gray-100 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 hover:dark:bg-gray-700 rounded-full transition-all active:scale-95 ml-2"
           aria-label="Toggle theme"
         >
           {isDark ? (

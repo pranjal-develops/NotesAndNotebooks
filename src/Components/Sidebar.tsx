@@ -1,35 +1,57 @@
-import React from 'react'
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../store/store";
+import {SetSideBarOpen} from "../store/slice/uiSlice"
 
-interface SidebarProps{
-  isOpen: boolean;
-}
-
-const sideElements =[
+const sideElements = [
   {
-    icon: 'ai',
-    name: 'this is name'
+    icon: "📝",
+    name: "All Notes",
   },
   {
-    icon: 'ai',
-    name: 'this is name'
+    icon: "⭐",
+    name: "Favorites",
   },
   {
-    icon: 'ai',
-    name: 'this is name'
+    icon: "🗑️",
+    name: "Trash",
   },
-]
+];
 
-const Sidebar:React.FC<SidebarProps> = ({isOpen}) => {
+const Sidebar = () => {
+  const dispatch = useDispatch();
+  const {isSidebarOpen} = useSelector((state:RootState)=>state.ui);
   return (
-    <div className={`h-full flex flex-col justify-start p-5 ${isOpen ? 'w-[20%]' : 'w-auto'}`}>
-        {sideElements.map((sideElement)=>(
-          <div className='flex flex-row px-2 py-1 gap-2' key={sideElement.icon}>
-          <h1>{sideElement.icon}</h1>
-          {isOpen && <h1>{sideElement.name}</h1>}
+    <>
+      <aside
+        className={`h-full md:flex flex-col justify-start p-5 ${isSidebarOpen ? "w-[20%]" : "w-auto hidden"}`}
+      >
+        {sideElements.map((sideElement,index) => (
+          <div className="flex flex-row px-2 py-1 gap-2" key={`${sideElement.name}-${index}`}>
+            <h1>{sideElement.icon}</h1>
+            {isSidebarOpen && <h1>{sideElement.name}</h1>}
           </div>
-      ))}
-    </div>
-  )
-}
+        ))}
+      </aside>
 
-export default Sidebar
+      {isSidebarOpen && (
+        <div className="md:hidden fixed inset-0 z-40 bg-black/50">
+          <aside className="fixed left-0 top-0 bottom-0 w-64 bg-white dark:bg-black p-5 shadow-lg">
+            <button className="mb-4 p-2 rounded" onClick={()=> dispatch(SetSideBarOpen())}>×</button>
+            {sideElements.map((sideElement) => (
+              <div
+                className="flex items-center px-2 py-1 gap-2"
+                key={sideElement.icon}
+              >
+                <span>{sideElement.icon}</span>
+                <span>{sideElement.name}</span>
+              </div>
+            ))}
+          </aside>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default Sidebar;

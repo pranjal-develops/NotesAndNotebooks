@@ -3,27 +3,30 @@ import EditPopup from "../Components/EditPopUp";
 import Navbar from "../Components/Navbar";
 import axios from "axios";
 import Add from "../Components/Add";
-import Note from "../Components/Note";
 import DrawingCanvas from "../Components/Canvas";
 import Sidebar from "../Components/Sidebar";
-
-interface note {
-  id: number;
-  title: string;
-  description: string;
-}
+import { useSelector } from "react-redux";
+import type { RootState } from "../store/store";
+import Notes from "../Components/Notes";
+import type { Note as note } from "../types";
+import AddButton from "../Components/AddButton";
 
 function Home() {
+  const { searchText, addNote } = useSelector((state: RootState) => state.note);
+
   const [notes, setnotes] = useState<note[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [editingnote, setEditingnote] = useState<note | null>(null);
-  const [addnote, setAddnote] = useState<boolean>(false);
-  const [sideBarOpen, setSideBarOpen] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        const response = await axios.get("http://localhost:8080/api/notes");
+        const response = await axios.get("http://localhost:8080/api/notes", {
+          params: {
+            q: searchText,
+          },
+        });
         setnotes(response.data);
       } catch (error) {
         console.log(error);
@@ -32,9 +35,7 @@ function Home() {
       }
     };
     fetchData();
-  }, [addnote]);
-
-  // if (loading) return <>Loading...</>;
+  }, [addNote, searchText]);
 
   const handleUpdate = (updatednote: note) => {
     setnotes(
@@ -43,46 +44,48 @@ function Home() {
   };
 
   const handleDelete = async (id: number) => {
+    const previousNotes = [...notes];
+    setnotes(notes.filter((note) => note.id !== id)); // Remove the deleted note from the state
     try {
       await axios.delete(`http://localhost:8080/api/notes/${id}`);
-      setnotes(notes.filter((note) => note.id !== id)); // Remove the deleted note from the state
     } catch (error) {
-      console.log(error);
+      console.log("Delete failed reverting UI",error);
+      setnotes(previousNotes);
     }
   };
+
+  const handleOptimisticAdd = (noteData: note, meta?: { tempId?: number; shouldRemove?: boolean }) => {
+  if (meta?.shouldRemove) {
+    setnotes(prev => prev.filter(n => n.id !== noteData.id));
+  } else if (meta?.tempId) {
+    setnotes(prev => prev.map(n => n.id === meta.tempId ? noteData : n));
+  } else {
+    setnotes(prev => [noteData, ...prev]);
+  }
+};
 
   return (
     <>
       <div className="flex flex-col h-screen w-full bg-[hsl(0,0%,90%)] text-gray-900 dark:bg-black dark:text-gray-100 transition-colors duration-500">
-        <Navbar onAddNote={() => setAddnote(true)} onClk={()=>setSideBarOpen(!sideBarOpen)} />
+        <Navbar />
         {/* <main className="flex-1 overflow-y-auto px-4 py-8 sm:px-6 lg:px-8"> */}
         <div className="flex overflow-hidden h-full">
-          <Sidebar isOpen={sideBarOpen} />
-        <main className="flex-1 overflow-y-auto">
-          {/* <div className="max-w-7xl mx-auto h-full"> */}
-          {/* <div className=" p-3 bg-[hsl(0,0%,95%)] rounded-3xl w-full mx-auto h-full"> */}
-          <div className=" p-3 mx-2 mr-5 bg-[hsl(0,0%,95%)] dark:bg-[hsl(0,0%,5%)] rounded-3xl w-full h-full">
-            {notes.length === 0 && !loading ? (
-              <div className="flex flex-col items-center justify-center h-full text-center opacity-60">
-                <p className="text-xl font-medium mb-2">No notes yet</p>
-                <p className="text-sm">Click the + button to add your first note.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 pb-20">
-                {notes.map((note) => (
-                  <Note
-                    key={note.id}
-                    note={note}
-                    onClk={() => setEditingnote(note)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </main>
+          <Sidebar />
+          <main className="relative flex-1 w-auto h-full overflow-y-auto p-3 md:p-6 md:mr-2 md:mb-2 bg-[hsl(0,0%,95%)] dark:bg-[hsl(0,0%,5%)] md:rounded-3xl ">
+            {/* <div className="max-w-7xl mx-auto h-full"> */}
+            {/* <div className=" p-3 bg-[hsl(0,0%,95%)] rounded-3xl w-full mx-auto h-full"> */}
+            {/* <div className=" p-3 bg-[hsl(0,0%,95%)] dark:bg-[hsl(0,0%,5%)] rounded-l-3xl w-full h-full"> */}
+            <Notes
+              notes={notes}
+              loading={loading}
+              setEditingnote={setEditingnote}
+            />
+            {/* <DrawingCanvas /> */}
+            <AddButton/>
+            {/* </div> */}
+          </main>
         </div>
       </div>
-      {/* <DrawingCanvas /> */}
       {/* Render the edit popup if there's a note to edit */}
       {editingnote && (
         <EditPopup
@@ -92,7 +95,7 @@ function Home() {
           onDelete={handleDelete}
         />
       )}
-      {addnote && <Add onClose={() => setAddnote(false)} />}
+      {addNote && <Add onAdd={handleOptimisticAdd} />}
     </>
   );
 }
