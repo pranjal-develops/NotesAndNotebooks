@@ -24,3 +24,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Extra files and folders
+Markdown
