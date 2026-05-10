@@ -17,15 +17,23 @@ function Home() {
   const [notes, setnotes] = useState<note[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [editingnote, setEditingnote] = useState<note | null>(null);
+    const [debouncedSearchText, setDebouncedSearchText] = useState(searchText);
+
+  //  Effect for Debouncing
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchText]);
+
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
         const response = await axios.get("http://localhost:8080/api/notes", {
-          params: {
-            q: searchText,
-          },
+          params: { q: debouncedSearchText },
         });
         setnotes(response.data);
       } catch (error) {
@@ -35,7 +43,17 @@ function Home() {
       }
     };
     fetchData();
-  }, [addNote, searchText]);
+  }, [addNote, debouncedSearchText]);
+
+    // Hybrid Local Filtering for "Instant" feel
+  const filteredNotes = notes.filter(note => {
+    const searchLower = searchText.toLowerCase();
+    // Safely check title and description, defaulting to empty string if null
+    const titleMatch = (note.title ?? "").toLowerCase().includes(searchLower);
+    const descMatch = (note.description ?? "").toLowerCase().includes(searchLower);
+    
+    return titleMatch || descMatch;
+  });
 
   const handleUpdate = (updatednote: note) => {
     setnotes(
@@ -76,9 +94,9 @@ function Home() {
             {/* <div className=" p-3 bg-[hsl(0,0%,95%)] rounded-3xl w-full mx-auto h-full"> */}
             {/* <div className=" p-3 bg-[hsl(0,0%,95%)] dark:bg-[hsl(0,0%,5%)] rounded-l-3xl w-full h-full"> */}
             <Notes
-              notes={notes}
-              loading={loading}
-              setEditingnote={setEditingnote}
+            notes={filteredNotes} 
+            loading={loading}
+            setEditingnote={setEditingnote}
             />
             {/* <DrawingCanvas /> */}
             <AddButton/>
