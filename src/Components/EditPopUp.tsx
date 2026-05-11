@@ -31,7 +31,23 @@ const EditPopup: React.FC<EditPopupProps> = ({ note, onClose, onUpdate, onDelete
   const [showCanvas, setShowCanvas] = useState(note.drawingData ? true : false);
   const [color, setColor] = useState(note.color || 'transparent');
   const [pinned, setPinned] = useState(note.pinned || false);
+  const [tagInput, setTagInput] = useState('');
+  const [tags, setTags] = useState(note?.tags || []);
 
+  const addTag = (e: React.KeyboardEvent) => {
+    if ((e.key==='Enter' || e.key===',') && tagInput.trim()) {
+      e.preventDefault();
+      const newTag = tagInput.trim().replace(',', '');
+      if(!tags.includes(newTag)){
+        setTags([...tags, newTag]);
+      }
+      setTagInput('');
+    }
+  }
+
+  const removeTag = (tagToRemote: string) =>{
+    setTags(tags.filter(t=>t!==tagToRemote));
+  }
 
   const canvasRef = useRef<CanvasHandle>(null);
 
@@ -39,7 +55,7 @@ const EditPopup: React.FC<EditPopupProps> = ({ note, onClose, onUpdate, onDelete
     e.preventDefault();
 
     const previousNotes = {...note};
-    const updatednote = { ...note, title, description, drawingData: showCanvas ? canvasRef.current?.getSaveData() : note.drawingData, color, pinned };
+    const updatednote = { ...note, title, description, drawingData: showCanvas ? canvasRef.current?.getSaveData() : note.drawingData, color, pinned, tags };
     onUpdate(updatednote);
     onClose(); // Close the popup after updating
     
@@ -165,6 +181,25 @@ const EditPopup: React.FC<EditPopupProps> = ({ note, onClose, onUpdate, onDelete
                 className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 resize-none"
               />
             </div>
+
+                <div className="space-y-2">
+  <label className="text-xs font-semibold text-gray-500 uppercase">Tags</label>
+  <div className="flex flex-wrap gap-2 p-2 border border-gray-100 dark:border-gray-800 rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
+    {tags.map(tag => (
+      <span key={tag} className="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-md text-xs">
+        {tag}
+        <button type="button" onClick={() => removeTag(tag)} className="hover:text-purple-900">×</button>
+      </span>
+    ))}
+    <input 
+      value={tagInput}
+      onChange={(e) => setTagInput(e.target.value)}
+      onKeyDown={addTag}
+      placeholder="Add tag..."
+      className="flex-1 bg-transparent outline-none text-xs"
+    />
+  </div>
+</div>
 
             <div className="pt-2">
               <button

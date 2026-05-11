@@ -5,16 +5,18 @@ import axios from "axios";
 import Add from "../Components/Add";
 import DrawingCanvas from "../Components/Canvas";
 import Sidebar from "../Components/Sidebar";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../store/store";
 import Notes from "../Components/Notes";
 import type { Note as note } from "../types";
 import AddButton from "../Components/AddButton";
+import { setNotes } from "../store/slice/noteSlice";
 
 function Home() {
-  const { searchText, addNote } = useSelector((state: RootState) => state.note);
+  const { searchText, addNote, notes } = useSelector((state: RootState) => state.note);
+  const dispatch = useDispatch();
 
-  const [notes, setnotes] = useState<note[]>([]);
+  // const [notes, setnotes] = useState<note[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [editingnote, setEditingnote] = useState<note | null>(null);
     const [debouncedSearchText, setDebouncedSearchText] = useState(searchText);
@@ -35,7 +37,7 @@ function Home() {
         const response = await axios.get("http://localhost:8080/api/notes", {
           params: { q: debouncedSearchText },
         });
-        setnotes(response.data);
+        dispatch(setNotes(response.data));
       } catch (error) {
         console.log(error);
       } finally {
@@ -56,29 +58,31 @@ function Home() {
   });
 
   const handleUpdate = (updatednote: note) => {
-    setnotes(
+    dispatch(setNotes(
       notes.map((note) => (note.id === updatednote.id ? updatednote : note)),
-    );
+    ));
   };
 
   const handleDelete = async (id: number) => {
     const previousNotes = [...notes];
-    setnotes(notes.filter((note) => note.id !== id)); // Remove the deleted note from the state
+    dispatch(setNotes(notes.filter((note) => note.id !== id))); // Remove the deleted note from the state
     try {
       await axios.delete(`http://localhost:8080/api/notes/${id}`);
     } catch (error) {
       console.log("Delete failed reverting UI",error);
-      setnotes(previousNotes);
+      dispatch(setNotes(previousNotes));
     }
   };
 
   const handleOptimisticAdd = (noteData: note, meta?: { tempId?: number; shouldRemove?: boolean }) => {
   if (meta?.shouldRemove) {
-    setnotes(prev => prev.filter(n => n.id !== noteData.id));
+    const updatedNotes = notes.filter(n => n.id !== noteData.id);
+    dispatch(setNotes(updatedNotes));
   } else if (meta?.tempId) {
-    setnotes(prev => prev.map(n => n.id === meta.tempId ? noteData : n));
+    const updatedNotes = notes.map(n => n.id === meta.tempId ? noteData : n);
+    dispatch(setNotes(updatedNotes));
   } else {
-    setnotes(prev => [noteData, ...prev]);
+    dispatch(setNotes([noteData, ...notes]));
   }
 };
 

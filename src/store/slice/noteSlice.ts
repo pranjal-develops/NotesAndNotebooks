@@ -1,16 +1,21 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import type { Note } from '../../types'
 import type { RootState } from '../store'
 
 // Define a type for the slice state
 interface NoteState {
   searchText: string,
-  addNote: boolean
+  addNote: boolean,
+  notes: Note[],
+  selectedTag: string | null
 }
 
 // Define the initial state using that type
 const initialState: NoteState = {
   searchText: '',
-  addNote: false
+  addNote: false,
+  notes: [],
+  selectedTag: null
 }
 
 export const noteSlice = createSlice({
@@ -29,9 +34,18 @@ export const noteSlice = createSlice({
     },
     AddNoteFalse: (state)=>{
       state.addNote = false;
-    }
-  },
+    },
+    setNotes: (state, action:PayloadAction<Note[]>)=>{
+      state.notes = action.payload;
+    },
+    addOptimisticNote: (state, action: PayloadAction<Note>) => {
+  state.notes.unshift(action.payload); // Immer lets you use "push/unshift" safely!
+},
+    setSelectedTag: (state, action: PayloadAction<string | null>) => {
+            state.selectedTag = action.payload;
+        },
+  }
 })
 
-export const { setSearchText, setAddNote, AddNoteTrue, AddNoteFalse } = noteSlice.actions
+export const { setSearchText, setAddNote, AddNoteTrue, AddNoteFalse, setNotes, setSelectedTag } = noteSlice.actions
 export default noteSlice.reducer

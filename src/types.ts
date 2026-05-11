@@ -7,4 +7,5 @@ export interface Note {
   updatedDate?: string;
   color?: string;
   pinned?: boolean;
+  tags?: string[];
 }

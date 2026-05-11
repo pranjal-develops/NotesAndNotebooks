@@ -31,6 +31,23 @@ const Add: React.FC<AddProps> = ({onAdd}) => {
   const [showCanvas, setShowCanvas] = useState(false);
   const [color, setColor] = useState('transparent');
   const [pinned, setPinned] = useState(false);
+  const [tagInput, setTagInput] = useState("")
+  const [tags, setTags] = useState<string[]>([]);
+
+  const addTag = (e: React.KeyboardEvent) => {
+    if ((e.key === 'Enter' || e.key === ',') &&  tagInput.trim()) {
+      e.preventDefault();
+      const newTag = tagInput.trim().replace(',', ' ');
+      if(!tags.includes(newTag)){
+        setTags([...tags, newTag]);
+      }
+      setTagInput('');
+    }
+  }
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(t => t !== tagToRemove));
+  }
 
   const canvasRef = useRef<CanvasHandle>(null);
 
@@ -45,6 +62,7 @@ const Add: React.FC<AddProps> = ({onAdd}) => {
       drawingData, 
       color, 
       pinned,
+      tags,
       isOptimistic: true 
     };
     onAdd(optimisticNote);
@@ -161,6 +179,24 @@ const Add: React.FC<AddProps> = ({onAdd}) => {
               />
                 </label>
             </div>
+            <div className="space-y-2">
+  <label className="text-xs font-semibold text-gray-500 uppercase">Tags</label>
+  <div className="flex flex-wrap gap-2 p-2 border border-gray-100 dark:border-gray-800 rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
+    {tags.map(tag => (
+      <span key={tag} className="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-md text-xs">
+        {tag}
+        <button type="button" onClick={() => removeTag(tag)} className="hover:text-purple-900">×</button>
+      </span>
+    ))}
+    <input 
+      value={tagInput}
+      onChange={(e) => setTagInput(e.target.value)}
+      onKeyDown={addTag}
+      placeholder="Add tag..."
+      className="flex-1 bg-transparent outline-none text-xs"
+    />
+  </div>
+</div>
 
             <div className="pt-2">
               <button
