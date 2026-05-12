@@ -13,7 +13,7 @@ import AddButton from "../Components/AddButton";
 import { setNotes } from "../store/slice/noteSlice";
 
 function Home() {
-  const { searchText, addNote, notes } = useSelector((state: RootState) => state.note);
+  const { searchText, addNote, notes, selectedTag } = useSelector((state: RootState) => state.note);
   const dispatch = useDispatch();
 
   // const [notes, setnotes] = useState<note[]>([]);
@@ -35,7 +35,10 @@ function Home() {
       setLoading(true);
       try {
         const response = await axios.get("http://localhost:8080/api/notes", {
-          params: { q: debouncedSearchText },
+          params: {
+             q: debouncedSearchText,
+             tag: selectedTag,
+            },
         });
         dispatch(setNotes(response.data));
       } catch (error) {
@@ -45,7 +48,7 @@ function Home() {
       }
     };
     fetchData();
-  }, [addNote, debouncedSearchText]);
+  }, [addNote, debouncedSearchText, selectedTag]);
 
     // Hybrid Local Filtering for "Instant" feel
   const filteredNotes = notes.filter(note => {
@@ -53,8 +56,10 @@ function Home() {
     // Safely check title and description, defaulting to empty string if null
     const titleMatch = (note.title ?? "").toLowerCase().includes(searchLower);
     const descMatch = (note.description ?? "").toLowerCase().includes(searchLower);
+
+    const tagMatch = !selectedTag || (note.tags ?? []).includes(selectedTag);
     
-    return titleMatch || descMatch;
+    return (titleMatch || descMatch) && tagMatch;
   });
 
   const handleUpdate = (updatednote: note) => {
