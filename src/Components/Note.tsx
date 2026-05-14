@@ -60,12 +60,12 @@ const Note: React.FC<noteProps> = ({ note, onClk }) => {
       )}
 
       {note.title && (
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 line-clamp-2 leading-tight">
+        <h2 className={`text-lg font-semibold text-gray-900 mb-2 line-clamp-2 leading-tight ${bgColor === 'transparent' ? `dark:text-gray-100`: ``}`}>
           {note.title}
         </h2>
       )}
 
-      <div className="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-wrap break-words">
+      <div className={`text-gray-700 text-sm whitespace-pre-wrap wrap-break-word ${bgColor === 'transparent' ? `dark:text-gray-300` : `` }`}>
         {note.description}
       </div>
 
