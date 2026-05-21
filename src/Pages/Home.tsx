@@ -93,7 +93,7 @@ function Home() {
 
   return (
     <>
-      <div className="flex flex-col h-screen w-full bg-[hsl(0,0%,90%)] text-gray-900 dark:bg-black dark:text-gray-100 transition-colors duration-500">
+      <div className="flex flex-col h-screen w-full bg-[hsl(0,0%,95%)] dark:bg-[hsl(0,0%,5%)] md:bg-[hsl(0,0%,90%)] text-gray-900 md:dark:bg-black dark:text-gray-100 transition-colors duration-500">
         <Navbar />
         {/* <main className="flex-1 overflow-y-auto px-4 py-8 sm:px-6 lg:px-8"> */}
         <div className="flex overflow-hidden h-full">

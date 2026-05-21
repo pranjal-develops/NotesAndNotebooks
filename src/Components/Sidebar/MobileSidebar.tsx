@@ -1,6 +1,7 @@
 import React from 'react'
 import { useDispatch } from 'react-redux';
 import { SetSideBarOpen } from '../../store/slice/uiSlice';
+import NotesSection from './NotesSection';
 
 const sideElements = [
   {
@@ -32,6 +33,7 @@ const MobileSidebar = () => {
                 <span>{sideElement.name}</span>
               </div>
             ))}
+            <NotesSection/>
           </aside>
         </div>
   )
