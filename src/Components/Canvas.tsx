@@ -2,6 +2,8 @@ import React, { useRef, useEffect, useState, useImperativeHandle, forwardRef } f
 
 interface DrawingCanvasProps {
   initialData?: string | null;
+  onSave?: (data: string) => void;
+  initialHeight?: number;
 }
 
 export interface CanvasHandle {
@@ -9,12 +11,14 @@ export interface CanvasHandle {
   clear: () => void;
 }
 
-const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(({ initialData }, ref) => {
+const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(({ initialData, onSave, initialHeight = 300 }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [color, setColor] = useState('#8b5cf6'); // Default purple
   const [brushSize, setBrushSize] = useState(5);
   const [tool, setTool] = useState<'pencil' | 'eraser'>('pencil');
+  const [canvasHeight, setCanvasHeight] = useState(initialHeight);
+  const [isResizing, setIsResizing] = useState(false);
 
   // Expose methods to parent components (like Add or EditPopUp)
   useImperativeHandle(ref, () => ({
@@ -26,6 +30,7 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(({ initialDat
       const ctx = canvas?.getContext('2d');
       if (ctx && canvas) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (onSave) onSave('');
       }
     }
   }));
@@ -40,14 +45,22 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(({ initialDat
     const resizeCanvas = () => {
       const container = canvas.parentElement;
       if (container) {
-        canvas.width = container.clientWidth;
-        canvas.height = 300; // Fixed height for the drawing area
+        // Save current drawing
+        const currentData = canvas.toDataURL();
         
-        // If we have initial data (editing a note), draw it back
-        if (initialData) {
-          const img = new Image();
-          img.onload = () => ctx.drawImage(img, 0, 0);
-          img.src = initialData;
+        canvas.width = container.clientWidth;
+        canvas.height = canvasHeight;
+        
+        // Redraw current drawing
+        const img = new Image();
+        img.onload = () => ctx.drawImage(img, 0, 0);
+        img.src = currentData;
+
+        // If we have initial data (editing a note) and canvas was empty, draw it
+        if (initialData && currentData.length < 1000) { // Simple check if canvas was empty
+          const initImg = new Image();
+          initImg.onload = () => ctx.drawImage(initImg, 0, 0);
+          initImg.src = initialData;
         }
       }
     };
@@ -55,7 +68,40 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(({ initialDat
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
     return () => window.removeEventListener('resize', resizeCanvas);
-  }, [initialData]);
+  }, [initialData, canvasHeight]);
+
+  const handleResizing = (e: MouseEvent | TouchEvent) => {
+    if (!isResizing || !canvasRef.current) return;
+    
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const newHeight = Math.max(150, clientY - rect.top);
+    setCanvasHeight(newHeight);
+  };
+
+  useEffect(() => {
+    const stopResizing = () => {
+      if (isResizing) {
+        setIsResizing(false);
+        if (onSave && canvasRef.current) {
+          onSave(canvasRef.current.toDataURL());
+        }
+      }
+    };
+
+    if (isResizing) {
+      window.addEventListener('mousemove', handleResizing);
+      window.addEventListener('mouseup', stopResizing);
+      window.addEventListener('touchmove', handleResizing);
+      window.addEventListener('touchend', stopResizing);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleResizing);
+      window.removeEventListener('mouseup', stopResizing);
+      window.removeEventListener('touchmove', handleResizing);
+      window.removeEventListener('touchend', stopResizing);
+    };
+  }, [isResizing]);
 
   const getCoordinates = (e: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current;
@@ -100,7 +146,14 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(({ initialDat
   };
 
   const stopDrawing = () => {
-    setIsDrawing(false);
+    if (isDrawing) {
+      setIsDrawing(false);
+      const ctx = canvasRef.current?.getContext('2d');
+      if (ctx) ctx.closePath();
+      if (onSave && canvasRef.current) {
+        onSave(canvasRef.current.toDataURL());
+      }
+    }
   };
 
   return (
@@ -147,7 +200,10 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(({ initialDat
           onClick={() => {
             const canvas = canvasRef.current;
             const ctx = canvas?.getContext('2d');
-            if (ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (ctx && canvas) {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              if (onSave) onSave('');
+            }
           }}
           className="text-xs font-medium text-red-500 hover:text-red-600 px-2"
         >
@@ -168,6 +224,15 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(({ initialDat
           onTouchEnd={stopDrawing}
           className="cursor-crosshair w-full"
         />
+
+        {/* Resize Handle */}
+        <div 
+          onMouseDown={(e) => { e.preventDefault(); setIsResizing(true); }}
+          onTouchStart={(e) => { setIsResizing(true); }}
+          className="h-3 w-full bg-gray-100 dark:bg-gray-800 hover:bg-purple-200 dark:hover:bg-purple-900/50 cursor-ns-resize flex items-center justify-center transition-colors group"
+        >
+          <div className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full group-hover:bg-purple-400 transition-colors" />
+        </div>
       </div>
     </div>
   );

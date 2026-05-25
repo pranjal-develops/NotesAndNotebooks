@@ -3,7 +3,8 @@ import { BsChevronDown, BsChevronRight, BsFileEarmarkText, BsJournalText, BsPlus
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../store/store';
 import { notebookApi } from '../../api';
-import { setActivePage } from '../../store/slice/notebookSlice';
+import { setActiveNotebook, setActivePage } from '../../store/slice/notebookSlice';
+import { setActiveView } from '../../store/slice/uiSlice';
 
 const NotebookSection = () => {
     const dispatch = useDispatch();
@@ -21,9 +22,16 @@ const NotebookSection = () => {
     //   Handle Page Selection
     const handlePageClick = async (notebookId: number, pageId: number) => {
         try {
+            // 1. Find the notebook in our state and set it as active
+            const notebook = notebooks.find(n => n.id === notebookId);
+            if (notebook) dispatch(setActiveNotebook(notebook));
+
+            // 2. Fetch and set the page
             const response = await notebookApi.getPage(notebookId, pageId);
             dispatch(setActivePage(response.data));
-            // You might also want to set active notebook here
+            
+            // 3. Switch view
+            dispatch(setActiveView('notebook-content'));
         } catch (error) {
             console.error("Failed to fetch page", error);
         }
@@ -33,7 +41,10 @@ const NotebookSection = () => {
         <div>
             <div className="flex items-center justify-between px-2 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 <span>Notebooks</span>
-                <button className="hover:text-purple-600 transition-colors">
+                <button 
+                    onClick={() => dispatch(setActiveView('create-notebook'))}
+                    className="hover:text-purple-600 transition-colors"
+                >
                     <BsPlusLg size={14} />
                 </button>
             </div>
@@ -70,7 +81,10 @@ const NotebookSection = () => {
                                         <span className="truncate">{page.title}</span>
                                     </button>
                                 ))}
-                                <button className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-gray-400 hover:text-purple-600 transition-colors">
+                                <button 
+                                    onClick={() => {/* TODO: Handle new page creation */}}
+                                    className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-gray-400 hover:text-purple-600 transition-colors"
+                                >
                                     <BsPlusLg size={12} /> New Page
                                 </button>
                             </div>

@@ -11,9 +11,12 @@ import Notes from "../Components/Notes";
 import type { Note as note } from "../types";
 import AddButton from "../Components/AddButton";
 import { setNotes } from "../store/slice/noteSlice";
+import CreateNotebook from "../Components/CreateNotebook";
+import NotebookContentView from "../Components/NotebookContentView";
 
 function Home() {
   const { searchText, addNote, notes, selectedTag } = useSelector((state: RootState) => state.note);
+  const { activeView } = useSelector((state: RootState) => state.ui);
   const dispatch = useDispatch();
 
   // const [notes, setnotes] = useState<note[]>([]);
@@ -99,17 +102,22 @@ function Home() {
         <div className="flex overflow-hidden h-full">
           <Sidebar />
           <main className="relative flex-1 w-auto h-full overflow-y-auto p-3 md:p-6 md:mr-2 md:mb-2 bg-[hsl(0,0%,95%)] dark:bg-[hsl(0,0%,5%)] md:rounded-3xl ">
-            {/* <div className="max-w-7xl mx-auto h-full"> */}
-            {/* <div className=" p-3 bg-[hsl(0,0%,95%)] rounded-3xl w-full mx-auto h-full"> */}
-            {/* <div className=" p-3 bg-[hsl(0,0%,95%)] dark:bg-[hsl(0,0%,5%)] rounded-l-3xl w-full h-full"> */}
-            <Notes
-            notes={filteredNotes} 
-            loading={loading}
-            setEditingnote={setEditingnote}
-            />
-            {/* <DrawingCanvas /> */}
+            {activeView === 'notes' && (
+              <Notes
+                notes={filteredNotes} 
+                loading={loading}
+                setEditingnote={setEditingnote}
+              />
+            )}
+            {activeView === 'create-notebook' && <CreateNotebook />}
+            {activeView === 'notebook-content' && (
+              <div className="text-center py-5">
+                {/* <h2 className="text-2xl font-bold">Notebook Content Coming Soon</h2> */}
+            {activeView === 'notebook-content' && <NotebookContentView />}
+                <p className="text-gray-500">We'll build the professional editor here next!</p>
+              </div>
+            )}
             <AddButton/>
-            {/* </div> */}
           </main>
         </div>
       </div>

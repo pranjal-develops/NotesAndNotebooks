@@ -2,12 +2,14 @@ import { createSlice } from '@reduxjs/toolkit'
 
 // Define a type for the slice state
 interface UiState {
-  isSidebarOpen: boolean
+  isSidebarOpen: boolean;
+  activeView: 'notes' | 'create-notebook' | 'notebook-content';
 }
 
 // Define the initial state using that type
 const initialState: UiState = {
   isSidebarOpen: false,
+  activeView: 'notes',
 }
 
 export const uiSlice = createSlice({
@@ -17,9 +19,12 @@ export const uiSlice = createSlice({
   reducers: {
     SetSideBarOpen: (state)=>{
         state.isSidebarOpen = !state.isSidebarOpen;
+    },
+    setActiveView: (state, action) => {
+        state.activeView = action.payload;
     }
   },
 })
 
-export const { SetSideBarOpen } = uiSlice.actions
+export const { SetSideBarOpen, setActiveView } = uiSlice.actions
 export default uiSlice.reducer

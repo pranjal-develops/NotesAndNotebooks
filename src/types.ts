@@ -30,3 +30,13 @@ export interface PageDetail{
   content: string;
   notebookId: number;
 }
+
+export type BlockType = 'text' | 'image' | 'drawing' | 'code';
+
+export interface Block{
+  id: string;
+  type: BlockType;
+  content: string;
+  language?: string;
+  width?: number;
+}
