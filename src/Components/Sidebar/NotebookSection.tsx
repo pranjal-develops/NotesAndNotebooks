@@ -1,15 +1,17 @@
 import React, { useState } from 'react'
-import { BsChevronDown, BsChevronRight, BsFileEarmarkText, BsJournalText, BsPlusLg } from 'react-icons/bs'
+import { BsChevronDown, BsChevronRight, BsFileEarmarkText, BsPlusLg } from 'react-icons/bs'
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../store/store';
 import { notebookApi } from '../../api';
 import { setActiveNotebook, setActivePage } from '../../store/slice/notebookSlice';
 import { setActiveView } from '../../store/slice/uiSlice';
+import { LuNotebookPen, LuNotebookText } from 'react-icons/lu';
 
 const NotebookSection = () => {
     const dispatch = useDispatch();
     const { notebooks, activeNotebook, activePage } = useSelector((state: RootState) => state.notebook);
     const [expandedNotebooks, setExpandedNotebooks] = useState<Record<number, boolean>>({});
+    const [showNotebooks, setshowNotebooks] = useState(false)
 
     //   Toggle Accordion
     const toggleNotebook = (id: number) => {
@@ -40,7 +42,12 @@ const NotebookSection = () => {
     return (
         <div>
             <div className="flex items-center justify-between px-2 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                <span>Notebooks</span>
+                <button className='flex items-center justify-between'
+                    onClick={() => setshowNotebooks(!showNotebooks)}
+                >
+            {showNotebooks ? <BsChevronDown size={12} /> : <BsChevronRight size={12} />}
+                <span className='uppercase tracking-wider pl-2'>Notebooks</span>
+                </button>
                 <button 
                     onClick={() => dispatch(setActiveView('create-notebook'))}
                     className="hover:text-purple-600 transition-colors"
@@ -50,7 +57,7 @@ const NotebookSection = () => {
             </div>
 
             <div className="space-y-1">
-                {notebooks.map((nb) => (
+                {showNotebooks && notebooks.map((nb) => (
                     <div key={nb.id}>
                         {/* Notebook Item */}
                         <button
@@ -59,10 +66,10 @@ const NotebookSection = () => {
                                 }`}
                         >
                             <div className="flex items-center gap-3">
-                                <BsJournalText className={activeNotebook?.id === nb.id ? 'text-purple-600' : 'text-gray-400'} />
+                                {/* <BsJournalText className={activeNotebook?.id === nb.id ? 'text-purple-600' : 'text-gray-400'} /> */}
+                            {expandedNotebooks[nb.id] ? <LuNotebookPen  className={activeNotebook?.id === nb.id ? 'text-purple-600' : 'text-gray-400'} size={18} /> : <LuNotebookText   className={activeNotebook?.id === nb.id ? 'text-purple-600' : 'text-gray-400'} size={18} />}
                                 <span className="truncate">{nb.name}</span>
                             </div>
-                            {expandedNotebooks[nb.id] ? <BsChevronDown size={12} /> : <BsChevronRight size={12} />}
                         </button>
 
                         {/* Nested Pages (Accordion Content) */}
