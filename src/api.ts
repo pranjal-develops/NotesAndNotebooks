@@ -8,4 +8,5 @@ export const notebookApi = {
     getPage: (notebookId:number, pageId:number) => axios.get(`${API_BASE}/notebooks/${notebookId}/pages/${pageId}`),
     createNotebook: (data: any) => axios.post(`${API_BASE}/notebooks`, data),
     addPage: (notebookId: number, data:any) => axios.post(`${API_BASE}/notebooks/${notebookId}/pages`, data),
+    updatePage: (notebookId: number, pageId: number, data:any) => axios.put(`${API_BASE}/notebooks/${notebookId}/pages/${pageId}`, data),
 }
