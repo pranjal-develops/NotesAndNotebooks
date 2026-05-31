@@ -14,6 +14,7 @@ import { setNotes } from "../store/slice/noteSlice";
 import CreateNotebook from "../Components/CreateNotebook";
 import NotebookContentView from "../Components/NotebookContentView";
 import PageView from "../Components/PageView";
+import UpdatedPageView from "../Components/UpdatedPageView";
 
 function Home() {
   const { searchText, addNote, notes, selectedTag } = useSelector((state: RootState) => state.note);
@@ -113,10 +114,8 @@ function Home() {
             {activeView === 'create-notebook' && <CreateNotebook />}
             {activeView === 'notebook-content' && (
               <div className="text-center py-5">
-                {/* <h2 className="text-2xl font-bold">Notebook Content Coming Soon</h2> */}
-            {/* {activeView === 'notebook-content' && <NotebookContentView />} */}
-            {activeView === 'notebook-content' && <PageView />}
-                <p className="text-gray-500">We'll build the professional editor here next!</p>
+            {activeView === 'notebook-content' && <UpdatedPageView />}
+                {/* <p className="text-gray-500">We'll build the professional editor here next!</p> */}
               </div>
             )}
             <AddButton/>
