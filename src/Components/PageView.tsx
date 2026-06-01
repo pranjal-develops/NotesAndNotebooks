@@ -161,12 +161,14 @@ const PageView = () => {
     }, [blocks, activePage, activeNotebook.id]);
 
     return (
-        <div className="flex-1 bg-white dark:bg-transparent overflow-y-auto custom-scrollbar">
-            <div className="max-w-3xl mx-auto py-20 px-10">
+        <div className="relative flex-1 bg-white dark:bg-transparent overflow-y-auto custom-scrollbar">
+            {/* <div className="max-w-3xl mx-auto py-20 px-10"> */}
+             <div className="w-full max-w-[1100px] py-16 px-6 md:px-16 lg:px-24">
 
                 {/* 1. SEAMLESS HEADER */}
                 <header className="mb-12 group/header">
-                    <div className="flex items-center gap-3 mb-6 opacity-0 group-hover/header:opacity-100 transition-opacity">
+                    {/* <div className="absolute top-0 left-0 flex items-center gap-3 mb-6 opacity-0 group-hover/header:opacity-100 transition-opacity"> */}
+                    <div className="absolute top-0 left-0 flex items-center gap-3 mb-6">
                         <button onClick={() => dispatch(setActiveView('notes'))} className="text-gray-400 hover:text-purple-600 flex items-center gap-1 text-xs font-bold uppercase tracking-widest">
                             <BsArrowLeft /> Back
                         </button>
@@ -180,7 +182,7 @@ const PageView = () => {
                         {activePage.title}
                     </h1>
 
-                    <div className="flex items-center gap-4 text-gray-400">
+                    <div className="absolute top-0 right-0 flex items-center gap-4 text-gray-400">
                         <span className="text-xs font-medium">Last edited 2 mins ago</span>
                         <button className="text-xs font-bold hover:text-purple-600 transition-colors flex items-center gap-1">
                             <BsDownload /> Export Markdown
@@ -210,7 +212,7 @@ const PageView = () => {
                                 )}
 
                                 {block.type === 'code' && (
-                                    <div className="my-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 border border-gray-100 dark:border-gray-800 p-1">
+                                    <div className="w-[90%] my-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 border border-gray-100 dark:border-gray-800 p-1">
                                         <div className="flex justify-between px-4 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                                             <span>{block.language}</span>
                                             <button onClick={() => navigator.clipboard.writeText(block.content)} className="hover:text-purple-600">Copy</button>

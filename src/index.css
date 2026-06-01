@@ -38,6 +38,7 @@
 /* Rich Text Editor Base Styles */
 .rich-text-block {
   min-height: 1.5em;
+  text-align: left;
 }
 
 .rich-text-block:empty:before {
