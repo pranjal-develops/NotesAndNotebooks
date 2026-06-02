@@ -10,6 +10,7 @@ import {
 import { notebookApi } from "../../api";
 import { setActiveView } from "../../store/slice/uiSlice";
 import { BsFileEarmarkText, BsPlusLg } from "react-icons/bs";
+import { Link } from "react-router-dom";
 
 const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
   const { notebooks, activeNotebook, activePage } = useSelector(
@@ -86,9 +87,10 @@ const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
       {expandedNotebooks[notebook.id] && (
         <div className="ml-9 mt-1 space-y-1">
           {notebook.pages.map((page) => (
-            <button
+            <Link
               key={page.id}
-              onClick={() => handlePageClick(notebook.id, page.id)}
+              // onClick={() => handlePageClick(notebook.id, page.id)
+              to={`/notebooks/${notebook.id}/pages/${page.id}`}
               className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 activePage?.id === page.id
                   ? "text-purple-600 bg-purple-50 dark:bg-purple-900/20"
@@ -97,7 +99,7 @@ const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
             >
               <BsFileEarmarkText size={14} />
               <span className="truncate">{page.title}</span>
-            </button>
+            </Link>
           ))}
           <button
             onClick={() => {

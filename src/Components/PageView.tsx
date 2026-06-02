@@ -8,15 +8,50 @@ import { setActiveView } from '../store/slice/uiSlice';
 import DrawingCanvas from './Canvas';
 import TextSection from './TextSection';
 import { convertToMarkdown, downloadMarkdown } from '../utils/markdownExport';
+import {useParams} from "react-router-dom";
+
+import { setActiveNotebook, setActivePage } from '../store/slice/notebookSlice';
 
 const PageView = () => {
-
+    const { notebookId, pageId } = useParams();
     const dispatch = useDispatch();
-    const { activePage, activeNotebook } = useSelector((state: RootState) => state.notebook);
+    const { activePage, activeNotebook, notebooks } = useSelector((state: RootState) => state.notebook);
     const [blocks, setBlocks] = useState<Block[]>([]);
     const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
     const [isResizing, setIsResizing] = useState(false);
     const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
+
+    // Fetch data based on URL parameters
+    useEffect(() => {
+        const syncStateWithUrl = async () => {
+            if (!notebookId || !pageId) return;
+
+            try {
+                // 1. If notebook isn't set or is the wrong one, find and set it
+                if (!activeNotebook || activeNotebook.id !== parseInt(notebookId)) {
+                    const notebook = notebooks.find(n => n.id === parseInt(notebookId));
+                    if (notebook) {
+                        dispatch(setActiveNotebook(notebook));
+                    } else {
+                        // If not in state, fetch it
+                        const response = await notebookApi.getAll();
+                        const found = response.data.find((n: any) => n.id === parseInt(notebookId));
+                        if (found) dispatch(setActiveNotebook(found));
+                    }
+                }
+
+                // 2. Fetch and set the page
+                if (!activePage || activePage.id !== parseInt(pageId)) {
+                    const response = await notebookApi.getPage(parseInt(notebookId), parseInt(pageId));
+                    dispatch(setActivePage(response.data));
+                }
+            } catch (error) {
+                console.error("Failed to sync PageView with URL params", error);
+            }
+        };
+
+        syncStateWithUrl();
+    }, [notebookId, pageId, notebooks, activeNotebook, activePage, dispatch]);
 
     // 1. Handle Image Resizing
     const handleImageResize = (e: MouseEvent | TouchEvent, id: string) => {
@@ -99,20 +134,6 @@ const PageView = () => {
         }
     }, [activePage]);
 
-    if (!activeNotebook || !activePage) {
-        return (
-            <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                <p>No notebook or page selected.</p>
-                <button
-                    onClick={() => dispatch(setActiveView('notes'))}
-                    className="mt-4 text-purple-600 hover:underline"
-                >
-                    Go back to Notes
-                </button>
-            </div>
-        );
-    }
-
     // 2. Add a new block
     const addBlock = (type: BlockType) => {
         const newBlock: Block = {
@@ -136,7 +157,7 @@ const PageView = () => {
     };
 
     useEffect(() => {
-        if (blocks.length === 0) return;
+        if (blocks.length === 0 || !activePage || !activeNotebook) return;
 
         // Check if blocks actually changed from what's in Redux
         const contentString = JSON.stringify(blocks);
@@ -158,7 +179,16 @@ const PageView = () => {
         }, 1500); // Wait 1.5 seconds after the last change
 
         return () => clearTimeout(timer);
-    }, [blocks, activePage, activeNotebook.id]);
+    }, [blocks, activePage, activeNotebook]);
+
+    if (!activeNotebook || !activePage) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mb-4"></div>
+                <p>Loading your page...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="relative flex-1 bg-white dark:bg-transparent overflow-y-auto custom-scrollbar">

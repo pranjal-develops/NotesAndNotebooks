@@ -2,14 +2,16 @@ import React from 'react'
 import Note from './Note';
 import type { Note as note } from '../types';
 import { BsJournalText } from 'react-icons/bs';
+import {useOutletContext} from "react-router-dom";
 
-interface NoteProps {
+interface HomeContext {
   notes: note[],
   loading: boolean,
   setEditingnote: React.Dispatch<React.SetStateAction<note | null>>;
 }
 
-const Notes: React.FC<NoteProps> = ({ notes, loading, setEditingnote }) => {
+const Notes = () => {
+  const {notes, loading, setEditingnote} = useOutletContext<HomeContext>();
   const pinnedNotes = notes.filter(n => n.pinned);
   const otherNotes = notes.filter(n => !n.pinned);
 

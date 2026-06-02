@@ -4,6 +4,7 @@ import { setActiveView } from '../store/slice/uiSlice';
 import { setNotebooks } from '../store/slice/notebookSlice';
 import { notebookApi } from '../api';
 import { BsArrowLeft, BsJournalText, BsPlusLg, BsTrash, BsX } from 'react-icons/bs';
+import {useNavigate} from "react-router-dom"
 
 const COLORS = [
   { name: 'Purple', value: '#8b5cf6' },
@@ -23,6 +24,7 @@ const CreateNotebook = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pageTitle, setPageTitle] = useState("");
   const [pendingPages, setPendingPages] = useState<string[]>([]);
+  const navigate = useNavigate();
 
   const addPendingPage = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -55,7 +57,8 @@ const CreateNotebook = () => {
       await notebookApi.createNotebook(payload);
       const response = await notebookApi.getAll();
       dispatch(setNotebooks(response.data));
-      dispatch(setActiveView('notes')); // Go back to notes or to the new notebook
+      navigate("/notes")
+      // dispatch(setActiveView('notes')); // Go back to notes or to the new notebook
     } catch (error) {
       console.error("Failed to create notebook", error);
     } finally {

@@ -14,6 +14,7 @@ import { setNotes } from "../store/slice/noteSlice";
 import CreateNotebook from "../Components/CreateNotebook";
 import NotebookContentView from "../Components/NotebookContentView";
 import PageView from "../Components/PageView";
+import {Outlet} from "react-router-dom";
 
 function Home() {
   const { searchText, addNote, notes, selectedTag } = useSelector((state: RootState) => state.note);
@@ -103,7 +104,7 @@ function Home() {
         <div className="flex overflow-hidden h-full">
           <Sidebar />
           <main className="relative flex-1 w-auto h-full overflow-y-auto p-3 md:p-6 md:mr-2 md:mb-2 bg-[hsl(0,0%,95%)] dark:bg-[hsl(0,0%,5%)] md:rounded-3xl ">
-            {activeView === 'notes' && (
+            {/* {activeView === 'notes' && (
               <Notes
                 notes={filteredNotes} 
                 loading={loading}
@@ -113,10 +114,17 @@ function Home() {
             {activeView === 'create-notebook' && <CreateNotebook />}
             {activeView === 'notebook-content' && (
               <div className="text-center py-5">
-            {activeView === 'notebook-content' && <PageView />}
+            {activeView === 'notebook-content' && <PageView />} */}
                 {/* <p className="text-gray-500">We'll build the professional editor here next!</p> */}
-              </div>
-            )}
+              {/* </div> */}
+            {/* )} */}
+           <Outlet 
+              context={{ 
+                notes: filteredNotes, 
+                loading, 
+                setEditingnote 
+              }} 
+            />
             <AddButton/>
           </main>
         </div>

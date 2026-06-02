@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
 import { setActiveView } from "../../store/slice/uiSlice";
 import NotebookItems from "./NotebookItems";
+import {Link} from "react-router-dom";
+
 
 const NotebookSection = () => {
   const dispatch = useDispatch();
@@ -24,12 +26,12 @@ const NotebookSection = () => {
           )}
           <span className="uppercase tracking-wider pl-2">Notebooks</span>
         </button>
-        <button
-          onClick={() => dispatch(setActiveView("create-notebook"))}
+        <Link
+          to="/notebooks/create"
           className="hover:text-purple-600 transition-colors"
         >
           <BsPlusLg size={14} />
-        </button>
+        </Link>
       </div>
 
       <div className="space-y-1">
