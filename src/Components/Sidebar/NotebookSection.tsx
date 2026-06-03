@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { BsChevronDown, BsChevronRight, BsPlusLg } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
-import { setActiveView } from "../../store/slice/uiSlice";
 import NotebookItems from "./NotebookItems";
 import {Link} from "react-router-dom";
 

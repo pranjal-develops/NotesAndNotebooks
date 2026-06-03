@@ -4,11 +4,10 @@ import type { RootState } from '../store/store';
 import type { Block, BlockType } from '../types';
 import { BsPlusLg, BsCodeSlash, BsPencilFill, BsType, BsDownload, BsArrowLeft, BsTrash, BsImage, BsCloudArrowUp, BsCheck2All } from 'react-icons/bs';
 import { notebookApi } from '../api';
-import { setActiveView } from '../store/slice/uiSlice';
 import DrawingCanvas from './Canvas';
 import TextSection from './TextSection';
 import { convertToMarkdown, downloadMarkdown } from '../utils/markdownExport';
-import {useParams} from "react-router-dom";
+import {Link, useParams} from "react-router-dom";
 
 import { setActiveNotebook, setActivePage } from '../store/slice/notebookSlice';
 
@@ -199,9 +198,11 @@ const PageView = () => {
                 <header className="mb-12 group/header">
                     {/* <div className="absolute top-0 left-0 flex items-center gap-3 mb-6 opacity-0 group-hover/header:opacity-100 transition-opacity"> */}
                     <div className="absolute top-0 left-0 flex items-center gap-3 mb-6">
-                        <button onClick={() => dispatch(setActiveView('notes'))} className="text-gray-400 hover:text-purple-600 flex items-center gap-1 text-xs font-bold uppercase tracking-widest">
+                        <Link
+                         to = '/notes'
+                          className="text-gray-400 hover:text-purple-600 flex items-center gap-1 text-xs font-bold uppercase tracking-widest">
                             <BsArrowLeft /> Back
-                        </button>
+                        </Link>
                         <div className="w-px h-3 bg-zinc-200" />
                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
                             {activeNotebook.name}

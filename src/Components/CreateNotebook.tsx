@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { setActiveView } from '../store/slice/uiSlice';
+// import { setActiveView } from '../store/slice/uiSlice';
 import { setNotebooks } from '../store/slice/notebookSlice';
 import { notebookApi } from '../api';
 import { BsArrowLeft, BsJournalText, BsPlusLg, BsTrash, BsX } from 'react-icons/bs';
-import {useNavigate} from "react-router-dom"
+import {Link, useNavigate} from "react-router-dom"
 
 const COLORS = [
   { name: 'Purple', value: '#8b5cf6' },
@@ -68,13 +68,14 @@ const CreateNotebook = () => {
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <button 
-        onClick={() => dispatch(setActiveView('notes'))}
+      <Link
+        // onClick={() => dispatch(setActiveView('notes'))}
+        to = '/notes'
         className="flex items-center gap-2 text-gray-500 hover:text-purple-600 transition-colors mb-8 group"
       >
         <BsArrowLeft className="group-hover:-translate-x-1 transition-transform" />
         Back to Notes
-      </button>
+      </Link>
 
       <div className="flex flex-col md:flex-row gap-12">
         <div className="flex-1">

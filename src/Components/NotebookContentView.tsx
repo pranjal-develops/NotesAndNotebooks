@@ -4,10 +4,10 @@ import type { RootState } from '../store/store';
 import type { Block, BlockType } from '../types';
 import { BsPlusLg, BsCodeSlash, BsPencilFill, BsType, BsDownload, BsArrowLeft, BsTrash, BsImage, BsCloudArrowUp, BsCheck2All } from 'react-icons/bs';
 import { notebookApi } from '../api';
-import { setActiveView } from '../store/slice/uiSlice';
 import DrawingCanvas from './Canvas';
 import TextSection from './TextSection';
 import { convertToMarkdown, downloadMarkdown } from '../utils/markdownExport';
+import { Link } from 'react-router-dom';
 
 const NotebookContentView = () => {
   const dispatch = useDispatch();
@@ -102,12 +102,12 @@ const NotebookContentView = () => {
     return (
       <div className="flex flex-col items-center justify-center h-full text-gray-500">
         <p>No notebook or page selected.</p>
-        <button
-          onClick={() => dispatch(setActiveView('notes'))}
+        <Link
+          to = '/notes'
           className="mt-4 text-purple-600 hover:underline"
         >
           Go back to Notes
-        </button>
+        </Link>
       </div>
     );
   }
@@ -165,12 +165,12 @@ const NotebookContentView = () => {
       {/* 1. Page Header */}
       <header className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => dispatch(setActiveView('notes'))}
+          <Link
+            to = '/notes'
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors text-gray-400"
           >
             <BsArrowLeft size={20} />
-          </button>
+          </Link>
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span

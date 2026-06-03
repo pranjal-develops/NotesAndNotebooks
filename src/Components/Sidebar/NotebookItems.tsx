@@ -8,9 +8,9 @@ import {
   setActivePage,
 } from "../../store/slice/notebookSlice";
 import { notebookApi } from "../../api";
-import { setActiveView } from "../../store/slice/uiSlice";
+// import { setActiveView } from "../../store/slice/uiSlice";
 import { BsFileEarmarkText, BsPlusLg } from "react-icons/bs";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
   const { notebooks, activeNotebook, activePage } = useSelector(
@@ -20,6 +20,7 @@ const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
     Record<number, boolean>
   >({});
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   //   Toggle Accordion
   const toggleNotebook = (id: number) => {
@@ -41,7 +42,10 @@ const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
       dispatch(setActivePage(response.data));
 
       // 3. Switch view
-      dispatch(setActiveView("notebook-content"));
+      // dispatch(setActiveView("notebook-content"));
+      navigate(`/notebooks/${notebookId}/pages/${pageId}`)
+
+
     } catch (error) {
       console.error("Failed to fetch page", error);
     }

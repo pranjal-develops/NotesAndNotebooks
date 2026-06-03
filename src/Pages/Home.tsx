@@ -3,22 +3,16 @@ import EditPopup from "../Components/EditPopUp";
 import Navbar from "../Components/Navbar";
 import axios from "axios";
 import Add from "../Components/Add";
-import DrawingCanvas from "../Components/Canvas";
 import Sidebar from "../Components/Sidebar";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../store/store";
-import Notes from "../Components/Notes";
 import type { Note as note } from "../types";
 import AddButton from "../Components/AddButton";
 import { setNotes } from "../store/slice/noteSlice";
-import CreateNotebook from "../Components/CreateNotebook";
-import NotebookContentView from "../Components/NotebookContentView";
-import PageView from "../Components/PageView";
 import {Outlet} from "react-router-dom";
 
 function Home() {
   const { searchText, addNote, notes, selectedTag } = useSelector((state: RootState) => state.note);
-  const { activeView } = useSelector((state: RootState) => state.ui);
   const dispatch = useDispatch();
 
   // const [notes, setnotes] = useState<note[]>([]);

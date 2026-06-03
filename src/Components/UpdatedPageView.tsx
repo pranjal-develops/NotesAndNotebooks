@@ -9,10 +9,10 @@ import {
 } from "react-icons/bs";
 import type { RootState } from "../store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { setActiveView } from "../store/slice/uiSlice";
 import TextSection from "./TextSection";
 import type { Block, BlockType } from "../types";
 import DrawingCanvas from "./Canvas";
+import { Link } from "react-router-dom";
 
 const UpdatedPageView = () => {
   const dispatch = useDispatch();
@@ -49,12 +49,12 @@ const UpdatedPageView = () => {
     return (
       <div className="flex flex-col items-center justify-center h-full text-gray-500">
         <p>No notebook or page selected.</p>
-        <button
-          onClick={() => dispatch(setActiveView("notes"))}
+        <Link
+          to = '/notes'
           className="mt-4 text-purple-600 hover:underline"
         >
           Go back to Notes
-        </button>
+        </Link>
       </div>
     );
   }
@@ -62,12 +62,12 @@ const UpdatedPageView = () => {
   return (
     <div className="relative w-full h-full flex flex-col justify-center items-center overflow-y-auto custom-scrollbar">
       <header className="w-full h-16 flex flex-col justify-between items-center">
-        <button
-          onClick={() => dispatch(setActiveView("notes"))}
+        <Link
+          to='/notes'
           className=" absolute top-0 left-0 text-gray-400 hover:text-purple-600 flex items-center gap-1 text-xs font-bold uppercase tracking-widest"
         >
           <BsArrowLeft /> Back
-        </button>
+        </Link>
 
         {/* <button className="absolute top-0 right-0 text-xs font-bold hover:text-purple-600 transition-colors flex items-center gap-1">
         <BsDownload /> Export Markdown
