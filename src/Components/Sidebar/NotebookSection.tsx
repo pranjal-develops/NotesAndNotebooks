@@ -35,7 +35,7 @@ const NotebookSection = () => {
 
       <div className="space-y-1">
         {showNotebooks &&
-          notebooks.map((nb) => <NotebookItems notebook={nb} />)}
+          notebooks.map((nb) => <NotebookItems key={nb.id} notebook={nb} />)}
       </div>
     </div>
   );

@@ -192,7 +192,7 @@ const PageView = () => {
     return (
         <div className="relative flex-1 bg-white dark:bg-transparent overflow-y-auto custom-scrollbar">
             {/* <div className="max-w-3xl mx-auto py-20 px-10"> */}
-             <div className="w-full max-w-[1100px] py-16 px-6 md:px-16 lg:px-24">
+             <div className="w-full max-w-275 py-16 px-6 md:px-16 lg:px-24">
 
                 {/* 1. SEAMLESS HEADER */}
                 <header className="mb-12 group/header">
@@ -214,8 +214,25 @@ const PageView = () => {
                     </h1>
 
                     <div className="absolute top-0 right-0 flex items-center gap-4 text-gray-400">
-                        <span className="text-xs font-medium">Last edited 2 mins ago</span>
-                        <button className="text-xs font-bold hover:text-purple-600 transition-colors flex items-center gap-1">
+                        {/* <span className="text-xs font-medium">Last edited 2 mins ago</span> */}
+                        <div className="flex items-center gap-2 px-3 py-1 bg-gray-50 dark:bg-gray-800/50 rounded-full border border-gray-100 dark:border-gray-700">
+                                    {saveStatus === 'saving' ? (
+                                      <>
+                                        <BsCloudArrowUp className="text-blue-500 animate-bounce" />
+                                        <span className="text-[10px] font-bold text-gray-400 uppercase">Saving...</span>
+                                      </>
+                                    ) : saveStatus === 'saved' ? (
+                                      <>
+                                        <BsCheck2All className="text-green-500" />
+                                        <span className="text-[10px] font-bold text-gray-400 uppercase">Saved</span>
+                                      </>
+                                    ) : (
+                                      <span className="text-[10px] font-bold text-red-500 uppercase">Save Error</span>
+                                    )}
+                            </div>
+                        <button
+                        onClick={() => downloadMarkdown(activePage.title, convertToMarkdown(activePage.title, blocks))}
+                        className="text-xs font-bold hover:text-purple-600 transition-colors flex items-center gap-1">
                             <BsDownload /> Export Markdown
                         </button>
                     </div>
