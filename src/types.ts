@@ -24,19 +24,30 @@ export interface Notebook{
   pages: PageSummary[];
 }
 
-export interface PageDetail{
+export interface PageDetail {
   id: number;
   title: string;
   content: string;
   notebookId: number;
+  blocks?: Block[];
 }
 
-export type BlockType = 'text' | 'image' | 'drawing' | 'code';
+export type BlockType = 'text' | 'image' | 'drawing' | 'code' | 'chart';
 
-export interface Block{
+export interface Block {
   id: string;
   type: BlockType;
-  content: string;
-  language?: string;
-  width?: number;
+  content: any; // Can be HTML string, code, or chart data
+  metadata?: {
+    language?: string;
+    width?: number;
+    config?: any; // For chart configurations
+  };
+}
+
+export interface PageDTO {
+  id?: number;
+  notebookId?: number;
+  title?: string;
+  blocks: Block[];
 }
