@@ -92,12 +92,13 @@ function Home() {
 
   return (
     <>
-      <div className="flex flex-col h-screen w-full bg-[hsl(0,0%,95%)] dark:bg-[hsl(0,0%,5%)] md:bg-[hsl(0,0%,90%)] text-gray-900 md:dark:bg-black dark:text-gray-100 transition-colors duration-500">
+      <div className="flex flex-col h-screen w-full bg-[hsl(0,0%,95%)] dark:bg-[hsl(0,0%,5%)] md:bg-[hsl(0,0%,95%)] text-gray-900 md:dark:bg-black dark:text-gray-100 transition-colors duration-500">
         <Navbar />
         {/* <main className="flex-1 overflow-y-auto px-4 py-8 sm:px-6 lg:px-8"> */}
-        <div className="flex overflow-hidden h-full">
+        <div className="flex overflow-hidden h-full md:pb-2 md:px-2">
           <Sidebar />
-          <main className="relative flex-1 w-auto h-full overflow-y-auto p-3 md:p-6 md:mr-2 md:mb-2 bg-[hsl(0,0%,95%)] dark:bg-[hsl(0,0%,5%)] md:rounded-3xl ">
+          <main className="relative flex-1 justify-center items-center w-auto h-full overflow-y-auto p-3 md:p-6 bg-white dark:bg-[hsl(0,0%,5%)] md:rounded-3xl ">
+          {/* <main className="relative flex-1 w-auto h-full overflow-y-auto p-3 md:p-6 md:mr-2 md:mb-2 bg-[hsl(0,0%,95%)] dark:bg-[hsl(0,0%,5%)] md:rounded-3xl "> */}
             {/* {activeView === 'notes' && (
               <Notes
                 notes={filteredNotes} 

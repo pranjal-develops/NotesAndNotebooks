@@ -24,15 +24,20 @@ const Sidebar = () => {
     fetchNotebooks();
   }, [dispatch]);
 
+  if(!isSidebarOpen){
+    return;
+  }
+
   return (
     <>
-      <div className="hidden md:flex w-64 h-screen m-2 px-1 flex-col">
+      <div className="hidden md:flex w-72 2xl:w-80 h-screen m-2 px-1 flex-col">
         <aside className="flex-1 overflow-y-auto px-2 py-4 space-y-6">
           <NotesSection />
           <NotebookSection />
         </aside>
       </div>
-      {isSidebarOpen && <MobileSidebar />}
+      <MobileSidebar />
+      {/* {isSidebarOpen && <MobileSidebar />} */}
     </>
   );
 };

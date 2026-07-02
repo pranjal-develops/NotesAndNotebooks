@@ -105,42 +105,47 @@ const NewTiptapEditor: React.FC<NewTiptapEditorProps> = ({ content = '', onChang
   return (
     <div className="min-h-screen">
       {/* Professional Sticky Toolbar */}
-      <div
+      {/* <div
        className="sticky top-0 z-30 bg-white/60 dark:bg-black/20 backdrop-blur-md border-b border-gray-100 dark:border-zinc-600 rounded-xl p-4 flex flex-wrap gap-4 items-center justify-center"
-       >
-        <div className="flex bg-gray-100 dark:bg-zinc-100 p-1 rounded-xl gap-1">
+       > */}
+       <div
+       className="sticky top-0 z-20 flex flex-wrap items-center gap-3 border-b border-slate-200/80 bg-white/90 px-4 py-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80"
+      >
+        {/* <div className="flex bg-gray-100 dark:bg-zinc-100 p-1 rounded-xl gap-1"> */}
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => editor.chain().focus().toggleBold().run()}
-            className={`p-2 rounded-lg ${editor.isActive("bold") ? "bg-white shadow-sm text-blue-600" : "text-gray-500"}`}
+            className={`p-2 rounded-lg text-gray-500 ${editor.isActive("bold") ? "bg-white dark:bg-zinc-900 shadow-sm" : "text-gray-500"}`}
           >
             <b>B</b>
           </button>
           <button
             onClick={() => editor.chain().focus().toggleItalic().run()}
-            className={`p-2 rounded-lg ${editor.isActive("italic") ? "bg-white shadow-sm text-blue-600" : "text-gray-500"}`}
+            className={`p-2 rounded-lg text-gray-500 ${editor.isActive("italic") ? "bg-white dark:bg-zinc-900 shadow-sm" : "text-gray-500"}`}
           >
             <i>I</i>
           </button>
           <button
             onClick={() => editor.chain().focus().toggleUnderline().run()}
-            className={`p-2 rounded-lg ${editor.isActive("underline") ? "bg-white shadow-sm text-blue-600" : "text-gray-500"}`}
+            className={`p-2 rounded-lg text-gray-500 ${editor.isActive("underline") ? "bg-white dark:bg-zinc-900 shadow-sm" : "text-gray-500"}`}
           >
             <u>U</u>
           </button>
         </div>
 
         {/* Lists */}
-        <div className="flex bg-gray-100 dark:bg-zinc-100 p-1 rounded-xl gap-1">
+        {/* <div className="flex bg-gray-100 dark:bg-zinc-100 p-1 rounded-xl gap-1"> */}
+        <div className="flex p-1 rounded-xl gap-1">
           <button
             onClick={() => editor.chain().focus().toggleBulletList().run()}
-            className={`p-2 rounded-lg ${editor.isActive("bulletList") ? "bg-white shadow-sm text-blue-600" : "text-gray-500"}`}
+            className={`p-2 rounded-lg text-gray-500 ${editor.isActive("bulletList") ? "bg-white dark:bg-zinc-900 shadow-sm" : "text-gray-500"}`}
             title="Bullet List"
           >
             •
           </button>
           <button
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            className={`p-2 rounded-lg ${editor.isActive("orderedList") ? "bg-white shadow-sm text-blue-600" : "text-gray-500"}`}
+            className={`p-2 rounded-lg text-gray-500 ${editor.isActive("orderedList") ? "bg-white dark:bg-zinc-900 shadow-sm" : "text-gray-500"}`}
             title="Numbered List"
           >
             1.
@@ -150,7 +155,7 @@ const NewTiptapEditor: React.FC<NewTiptapEditorProps> = ({ content = '', onChang
         {/* Font Family Dropdown */}
         <select
           onChange={(e) => editor.chain().focus().setFontFamily(e.target.value).run()}
-          className="bg-gray-100 dark:bg-zinc-100 p-2 rounded-xl text-sm outline-none border-none text-gray-700"
+          className="bg-gray-100 dark:bg-zinc-900 p-2 rounded-xl text-sm outline-none border-none text-gray-700"
           value={editor.getAttributes('textStyle').fontFamily || ''}
         >
           <option value="">Font</option>
@@ -162,7 +167,7 @@ const NewTiptapEditor: React.FC<NewTiptapEditorProps> = ({ content = '', onChang
         {/* Font Size Dropdown */}
         <select
           onChange={(e) => (editor.chain().focus() as any).setFontSize(e.target.value).run()}
-          className="bg-gray-100 dark:bg-zinc-100 p-2 rounded-xl text-sm outline-none border-none text-gray-700"
+          className="bg-gray-100 dark:bg-zinc-900 p-2 rounded-xl text-sm outline-none border-none text-gray-700"
           value={editor.getAttributes('textStyle').fontSize || ''}
         >
           <option value="">Size</option>
@@ -172,11 +177,11 @@ const NewTiptapEditor: React.FC<NewTiptapEditorProps> = ({ content = '', onChang
         </select>
 
         {/* Color Picker */}
-        <div className="flex items-center gap-2 bg-gray-100 dark:bg-zinc-100 p-1 rounded-xl">
+        <div className="flex items-center gap-2 bg-gray-100 dark:bg-zinc-900 p-1 rounded-xl">
           <input
             type="color"
             onInput={(e) => editor.chain().focus().setColor((e.target as HTMLInputElement).value).run()}
-            className="w-8 h-8 rounded-lg cursor-pointer border-none bg-transparent"
+            className="w-8 h-8 rounded-xl cursor-pointer border-none bg-transparent"
             value={editor.getAttributes('textStyle').color || '#000000'}
           />
         </div>
