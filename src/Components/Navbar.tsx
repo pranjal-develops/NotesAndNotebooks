@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Search from "./Search";
 import { GiHamburgerMenu } from "react-icons/gi";
 import {SetSideBarOpen} from "../store/slice/uiSlice"
-import {AddNoteTrue} from "../store/slice/noteSlice"
 import { useDispatch } from "react-redux";
 
 //  const toggleDarkMode = () =>{
@@ -31,8 +30,8 @@ const Navbar = () => {
   };
 
   return (
-    // <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
-    // <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-black backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
+    // <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 transition-colors duration-300">
+    // <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-black backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 transition-colors duration-300">
     <header className="sticky top-0 bg-transparent flex items-center justify-between px-2 md:px-6 py-4">
       <div className="flex items-center gap-2">
         <button className="cursor-pointer bg-zinc-100 rounded-xl p-2 hover:bg-white dark:bg-[hsl(0,0%,5%)] dark:hover:bg-[hsl(0,0%,10%)] z-50 mr-2" onClick={()=>dispatch(SetSideBarOpen())}><GiHamburgerMenu /></button>
@@ -48,7 +47,7 @@ const Navbar = () => {
         </button> */}
         <button
           onClick={toggleTheme}
-          className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 hover:dark:text-gray-100 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 hover:dark:bg-gray-700 rounded-full transition-all active:scale-95 ml-2"
+          className="p-2 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 hover:dark:text-zinc-100 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 hover:dark:bg-zinc-700 rounded-full transition-all active:scale-95 ml-2"
           aria-label="Toggle theme"
         >
           {isDark ? (

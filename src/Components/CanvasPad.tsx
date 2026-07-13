@@ -30,6 +30,7 @@ type Props = {
   defaultColor?: string;
   defaultSize?: number;
   style?: React.CSSProperties;
+  onSave?: (dataUrl: string) => void;
 };
 
 const devicePixelRatioSafe = () => (typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1);
@@ -42,7 +43,8 @@ const CanvasPad = forwardRef<CanvasPadHandle, Props>((props, ref) => {
     initialStrokes = [],
     defaultColor = "#000000",
     defaultSize = 3,
-    style
+    style,
+    onSave
   } = props;
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -105,6 +107,7 @@ const CanvasPad = forwardRef<CanvasPadHandle, Props>((props, ref) => {
       if (s) {
         undoneRef.current.push(s);
         redrawAll();
+        if (onSave) onSave(canvasRef.current!.toDataURL());
       }
     },
     redo: () => {
@@ -112,6 +115,7 @@ const CanvasPad = forwardRef<CanvasPadHandle, Props>((props, ref) => {
       if (s) {
         strokesRef.current.push(s);
         redrawAll();
+        if (onSave) onSave(canvasRef.current!.toDataURL());
       }
     },
     clear: () => {
@@ -123,6 +127,7 @@ const CanvasPad = forwardRef<CanvasPadHandle, Props>((props, ref) => {
         ctx.fillStyle = backgroundColor;
         ctx.fillRect(0, 0, width, height);
       }
+      if (onSave) onSave("");
     }
   }));
 
@@ -162,6 +167,7 @@ const CanvasPad = forwardRef<CanvasPadHandle, Props>((props, ref) => {
     if (currentStroke) {
       strokesRef.current.push(currentStroke);
       setCurrentStroke(null);
+      if (onSave) onSave(canvasRef.current!.toDataURL());
     }
     lastPosRef.current = null;
   };
@@ -259,12 +265,12 @@ const CanvasPad = forwardRef<CanvasPadHandle, Props>((props, ref) => {
   };
 
   // public setters for color/size via refs
-  const setColor = (c: string) => {
-    colorRef.current = c;
-  };
-  const setSize = (s: number) => {
-    sizeRef.current = s;
-  };
+  // const setColor = (c: string) => {
+  //   colorRef.current = c;
+  // };
+  // const setSize = (s: number) => {
+  //   sizeRef.current = s;
+  // };
 
   // Provide optional UI controls when needed (you may omit in pure component)
   return (

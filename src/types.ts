@@ -21,15 +21,17 @@ export interface Notebook{
   name: string;
   description: string;
   color: string;
+  logo?:string;
   pages: PageSummary[];
 }
 
 export interface PageDetail {
   id: number;
   title: string;
-  content: string;
-  notebookId: number;
-  blocks?: Block[];
+  contentHtml: string;
+  notebook_id: number;
+  drawings?: string[];
+  codeBlocks?: { language: string; code: string }[];
 }
 
 export type BlockType = 'text' | 'image' | 'drawing' | 'code' | 'chart';
@@ -47,7 +49,14 @@ export interface Block {
 
 export interface PageDTO {
   id?: number;
-  notebookId?: number;
   title?: string;
-  blocks: Block[];
+  contentHtml?: string;
+  drawings?: string[];
+  charts?: any[];
+  codeBlocks?: { language: string; code: string }[];
+  images?: string[];
+  pageOrder?: number;
+  createdDate?: string;
+  updatedDate?: string;
+  notebook_id?: number;
 }
