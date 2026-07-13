@@ -7,7 +7,11 @@ import MobileSidebar from './Sidebar/MobileSidebar';
 import NotesSection from './Sidebar/NotesSection';
 import NotebookSection from './Sidebar/NotebookSection';
 
-const Sidebar = () => {
+interface SidebarProps {
+  width?: number;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ width = 288 }) => {
   const dispatch = useDispatch();
   const { isSidebarOpen } = useSelector((state: RootState) => state.ui);
 
@@ -30,14 +34,16 @@ const Sidebar = () => {
 
   return (
     <>
-      <div className="hidden md:flex w-72 2xl:w-80 h-screen m-2 px-1 flex-col">
-        <aside className="flex-1 overflow-y-auto px-2 py-4 space-y-6">
+      <div 
+        className="hidden md:flex h-full m-2 px-1 flex-col overflow-hidden"
+        style={{ width: isSidebarOpen ? `${width}px` : '80px' }}
+      >
+        <aside className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-4 space-y-6 custom-scrollbar">
           <NotesSection />
           <NotebookSection />
         </aside>
       </div>
-      <MobileSidebar />
-      {/* {isSidebarOpen && <MobileSidebar />} */}
+      {isSidebarOpen && <MobileSidebar />}
     </>
   );
 };

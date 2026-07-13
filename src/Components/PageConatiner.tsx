@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { notebookApi } from "../api";
-import PageEditor from "./PageEditor";
+// import PageEditor from "./PageEditor";
 import { type PageDTO } from "../types";
-import PageViewer from "./PageViewer";
+// import PageViewer from "./PageViewer";
 
 const PageContainer: React.FC = () => {
   const { notebookId, pageId } = useParams<{ notebookId: string; pageId: string }>();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   
   const [page, setPage] = useState<PageDTO | null>(null);
   const [isEditing, setIsEditing] = useState(!pageId);
@@ -33,14 +33,14 @@ const PageContainer: React.FC = () => {
     }
   }, [notebookId, pageId]);
 
-  const handleSaved = (savedPage: PageDTO) => {
-    setPage(savedPage);
-    setIsEditing(false);
-    // If it was a new page, update the URL without refreshing
-    if (!pageId && savedPage.id && notebookId) {
-      navigate(`/notebooks/${notebookId}/pages/${savedPage.id}`, { replace: true });
-    }
-  };
+  // const handleSaved = (savedPage: PageDTO) => {
+  //   setPage(savedPage);
+  //   setIsEditing(false);
+  //   // If it was a new page, update the URL without refreshing
+  //   if (!pageId && savedPage.id && notebookId) {
+  //     navigate(`/notebooks/${notebookId}/pages/${savedPage.id}`, { replace: true });
+  //   }
+  // };
 
   if (loading) {
     return (
@@ -55,11 +55,11 @@ const PageContainer: React.FC = () => {
     <div className="min-h-screen bg-gray-50/30">
       {isEditing ? (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <PageEditor 
+          {/* <PageEditor 
             notebookId={parseInt(notebookId!!)} 
             page={page ?? undefined} 
             onSaved={handleSaved} 
-          />
+          /> */}
         </div>
       ) : page ? (
         <div className="max-w-5xl mx-auto py-8 px-4 space-y-6 animate-in fade-in duration-700">
@@ -72,7 +72,7 @@ const PageContainer: React.FC = () => {
               Edit Content
             </button>
           </div>
-          <PageViewer page={page} />
+          {/* <PageViewer page={page} /> */}
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center min-h-[40vh] text-gray-400">

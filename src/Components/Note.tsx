@@ -49,23 +49,23 @@ const Note: React.FC<noteProps> = ({ note, onClk }) => {
 
   return (
     <div
-      className='group relative flex flex-col p-5 rounded-xl border border-[hsl(0,0%,85%)] dark:border-[hsl(0,0%,20%)] shadow-sm hover:shadow-md transition-all active:scale-98 duration-150 cursor-pointer overflow-hidden '
+      className='group relative flex flex-col p-5 rounded-xl border border-[hsl(0,0%,85%)] dark:border-[hsl(0,0%,20%)] shadow-sm hover:shadow-md dark:shadow-zinc-900 transition-all active:scale-98 duration-150 cursor-pointer overflow-hidden '
       style={{ backgroundColor: bgColor }} // Apply dynamic color
       onClick={onClk}
     >
       {note.pinned && (
-        <div className="absolute top-3 right-3 text-gray-400">
+        <div className="absolute top-3 right-3 text-zinc-400">
           <BsPinAngleFill size={16} />
         </div>
       )}
 
       {note.title && (
-        <h2 className={`text-lg font-semibold text-gray-900 mb-2 line-clamp-2 leading-tight ${bgColor === 'transparent' ? `dark:text-gray-100`: ``}`}>
+        <h2 className={`text-lg font-semibold text-zinc-900 mb-2 line-clamp-2 leading-tight ${bgColor === 'transparent' ? `dark:text-zinc-100`: ``}`}>
           {note.title}
         </h2>
       )}
 
-      <div className={`text-gray-700 text-sm whitespace-pre-wrap wrap-break-word ${bgColor === 'transparent' ? `dark:text-gray-300` : `` }`}>
+      <div className={`text-zinc-700 text-sm whitespace-pre-wrap wrap-break-word ${bgColor === 'transparent' ? `dark:text-zinc-300` : `` }`}>
         {note.description}
       </div>
 
@@ -76,13 +76,13 @@ const Note: React.FC<noteProps> = ({ note, onClk }) => {
       )}
 
       {/* Date indicator for a professional touch */}
-      <div className="mt-4 text-[10px] text-gray-500 font-medium">
+      <div className="mt-4 text-[10px] text-zinc-500 font-medium">
         {note.updatedDate ? `Edited ${relativeDate(note.updatedDate)}` : ''}
       </div>
       {note.tags && note.tags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1">
           {note.tags.map(tag => (
-            <span key={tag} className="px-2 py-0.5 bg-black/5 dark:bg-white/10 rounded-full text-[10px] font-medium text-gray-600 dark:text-gray-400">
+            <span key={tag} className="px-2 py-0.5 bg-black/5 dark:bg-white/10 rounded-full text-[10px] font-medium text-zinc-600 dark:text-zinc-400">
               #{tag}
             </span>
           ))}

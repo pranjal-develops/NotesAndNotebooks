@@ -11,6 +11,7 @@ import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import ListItem from "@tiptap/extension-list-item";
 import { Extension } from '@tiptap/core';
+import Image from '@tiptap/extension-image';
 
 // Custom Font Size Extension
 const FontSize = Extension.create({
@@ -49,9 +50,20 @@ const FontSize = Extension.create({
   },
 });
 
+interface EditorData {
+  html: string;
+  drawings: string[];
+  codeBlocks: {
+    language: string, 
+    code: string
+  }[];
+  images: string[];
+}
+
 interface NewTiptapEditorProps {
   content?: string;
-  onChange?: (html: string) => void;
+  // onChange?: (html: string) => void;
+  onChange?: (data: EditorData) => void;
 }
 
 const fontFamilies = [
@@ -81,23 +93,120 @@ const NewTiptapEditor: React.FC<NewTiptapEditorProps> = ({ content = '', onChang
       FontSize,
       CodeBlockNode,
       DrawingNode,
+      Image.configure({
+        allowBase64: true,
+        HTMLAttributes: {
+          class: 'rounded-xl border border-slate-200 shadow-sm max-w-full h-auto my-4',
+        },
+      }),
       Placeholder.configure({
         placeholder: 'Start writing your note...',
       }),
     ],
     content: content,
     onUpdate: ({ editor }) => {
-      onChange?.(editor.getHTML());
-    },
+  const html = editor.getHTML();
+  const json = editor.getJSON();
+      const drawings: string[] = [];
+      const codeBlocks: { language: string; code: string }[] = [];
+      const images: string[] = [];
+
+      // Robust recursive search for widgets anywhere in the document
+      const extractData = (content: any[]) => {
+        if (!content) return;
+        for (const node of content) {
+          if (node.type === 'drawingWidget' && node.attrs?.dataUrl) {
+            drawings.push(node.attrs.dataUrl);
+          } else if (node.type === 'codeBlockWidget') {
+            codeBlocks.push({ 
+              language: node.attrs?.language || 'javascript', 
+              code: node.attrs?.code || '' 
+            });
+          } else if (node.type === 'image' && node.attrs?.src) {
+            images.push(node.attrs.src);
+          }
+          if (node.content) {
+            extractData(node.content);
+          }
+        }
+      };
+
+      extractData(json.content || []);
+
+      onChange?.({
+        html,
+        drawings,
+        codeBlocks,
+        images,
+      });
+},
     immediatelyRender: false,
+    editorProps: {
+      handlePaste: (view, event) => {
+        const items = Array.from(event.clipboardData?.items || []);
+        const imageItem = items.find(item => item.type.startsWith('image'));
+
+        if (imageItem) {
+          const file = imageItem.getAsFile();
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const src = e.target?.result as string;
+              view.dispatch(view.state.tr.replaceSelectionWith(
+                view.state.schema.nodes.image.create({ src })
+              ));
+            };
+            reader.readAsDataURL(file);
+            return true; // handled
+          }
+        }
+        return false;
+      },
+      handleDrop: (view, event, _slice, moved) => {
+        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+          const file = event.dataTransfer.files[0];
+          if (file.type.startsWith('image')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const src = e.target?.result as string;
+              const { schema } = view.state;
+              const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY });
+              if (coordinates) {
+                const node = schema.nodes.image.create({ src });
+                const transaction = view.state.tr.insert(coordinates.pos, node);
+                view.dispatch(transaction);
+              }
+            };
+            reader.readAsDataURL(file);
+            return true; // handled
+          }
+        }
+        return false;
+      },
+    },
   });
 
   const insertCodeBlock = () => {
     editor?.chain().focus().insertContent({ type: 'codeBlockWidget', attrs: { language: 'javascript', code: '// Start coding...' } }).run();
   };
+  const insertChart = () => {
+    editor?.chain().focus().insertContent({ type: 'chartWidget', attrs: { language: 'javascript', code: '// Start coding...' } }).run();
+  };
 
   const insertDrawing = () => {
     editor?.chain().focus().insertContent({ type: 'drawingWidget' }).run();
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const src = event.target?.result as string;
+        editor?.chain().focus().setImage({ src }).run();
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   if (!editor) return null;
@@ -106,46 +215,46 @@ const NewTiptapEditor: React.FC<NewTiptapEditorProps> = ({ content = '', onChang
     <div className="min-h-screen">
       {/* Professional Sticky Toolbar */}
       {/* <div
-       className="sticky top-0 z-30 bg-white/60 dark:bg-black/20 backdrop-blur-md border-b border-gray-100 dark:border-zinc-600 rounded-xl p-4 flex flex-wrap gap-4 items-center justify-center"
+       className="sticky top-0 z-30 bg-white/60 dark:bg-black/20 backdrop-blur-md border-b border-zinc-100 dark:border-zinc-600 rounded-xl p-4 flex flex-wrap gap-4 items-center justify-center"
        > */}
        <div
        className="sticky top-0 z-20 flex flex-wrap items-center gap-3 border-b border-slate-200/80 bg-white/90 px-4 py-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80"
       >
-        {/* <div className="flex bg-gray-100 dark:bg-zinc-100 p-1 rounded-xl gap-1"> */}
+        {/* <div className="flex bg-zinc-100 dark:bg-zinc-100 p-1 rounded-xl gap-1"> */}
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => editor.chain().focus().toggleBold().run()}
-            className={`p-2 rounded-lg text-gray-500 ${editor.isActive("bold") ? "bg-white dark:bg-zinc-900 shadow-sm" : "text-gray-500"}`}
+            className={`p-2 rounded-lg text-zinc-500 ${editor.isActive("bold") ? "bg-white dark:bg-zinc-900 shadow-sm" : "text-zinc-500"}`}
           >
             <b>B</b>
           </button>
           <button
             onClick={() => editor.chain().focus().toggleItalic().run()}
-            className={`p-2 rounded-lg text-gray-500 ${editor.isActive("italic") ? "bg-white dark:bg-zinc-900 shadow-sm" : "text-gray-500"}`}
+            className={`p-2 rounded-lg text-zinc-500 ${editor.isActive("italic") ? "bg-white dark:bg-zinc-900 shadow-sm" : "text-zinc-500"}`}
           >
             <i>I</i>
           </button>
           <button
             onClick={() => editor.chain().focus().toggleUnderline().run()}
-            className={`p-2 rounded-lg text-gray-500 ${editor.isActive("underline") ? "bg-white dark:bg-zinc-900 shadow-sm" : "text-gray-500"}`}
+            className={`p-2 rounded-lg text-zinc-500 ${editor.isActive("underline") ? "bg-white dark:bg-zinc-900 shadow-sm" : "text-zinc-500"}`}
           >
             <u>U</u>
           </button>
         </div>
 
         {/* Lists */}
-        {/* <div className="flex bg-gray-100 dark:bg-zinc-100 p-1 rounded-xl gap-1"> */}
+        {/* <div className="flex bg-zinc-100 dark:bg-zinc-100 p-1 rounded-xl gap-1"> */}
         <div className="flex p-1 rounded-xl gap-1">
           <button
             onClick={() => editor.chain().focus().toggleBulletList().run()}
-            className={`p-2 rounded-lg text-gray-500 ${editor.isActive("bulletList") ? "bg-white dark:bg-zinc-900 shadow-sm" : "text-gray-500"}`}
+            className={`p-2 rounded-lg text-zinc-500 ${editor.isActive("bulletList") ? "bg-white dark:bg-zinc-900 shadow-sm" : "text-zinc-500"}`}
             title="Bullet List"
           >
             •
           </button>
           <button
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            className={`p-2 rounded-lg text-gray-500 ${editor.isActive("orderedList") ? "bg-white dark:bg-zinc-900 shadow-sm" : "text-gray-500"}`}
+            className={`p-2 rounded-lg text-zinc-500 ${editor.isActive("orderedList") ? "bg-white dark:bg-zinc-900 shadow-sm" : "text-zinc-500"}`}
             title="Numbered List"
           >
             1.
@@ -155,7 +264,7 @@ const NewTiptapEditor: React.FC<NewTiptapEditorProps> = ({ content = '', onChang
         {/* Font Family Dropdown */}
         <select
           onChange={(e) => editor.chain().focus().setFontFamily(e.target.value).run()}
-          className="bg-gray-100 dark:bg-zinc-900 p-2 rounded-xl text-sm outline-none border-none text-gray-700"
+          className="bg-zinc-100 dark:bg-zinc-900 p-2 rounded-xl text-sm outline-none border-none text-zinc-700"
           value={editor.getAttributes('textStyle').fontFamily || ''}
         >
           <option value="">Font</option>
@@ -167,7 +276,7 @@ const NewTiptapEditor: React.FC<NewTiptapEditorProps> = ({ content = '', onChang
         {/* Font Size Dropdown */}
         <select
           onChange={(e) => (editor.chain().focus() as any).setFontSize(e.target.value).run()}
-          className="bg-gray-100 dark:bg-zinc-900 p-2 rounded-xl text-sm outline-none border-none text-gray-700"
+          className="bg-zinc-100 dark:bg-zinc-900 p-2 rounded-xl text-sm outline-none border-none text-zinc-700"
           value={editor.getAttributes('textStyle').fontSize || ''}
         >
           <option value="">Size</option>
@@ -177,7 +286,7 @@ const NewTiptapEditor: React.FC<NewTiptapEditorProps> = ({ content = '', onChang
         </select>
 
         {/* Color Picker */}
-        <div className="flex items-center gap-2 bg-gray-100 dark:bg-zinc-900 p-1 rounded-xl">
+        <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl">
           <input
             type="color"
             onInput={(e) => editor.chain().focus().setColor((e.target as HTMLInputElement).value).run()}
@@ -186,11 +295,11 @@ const NewTiptapEditor: React.FC<NewTiptapEditorProps> = ({ content = '', onChang
           />
         </div>
 
-        <div className="w-px h-6 bg-gray-200" />
+        <div className="w-px h-6 bg-zinc-200" />
 
         <button
           onClick={insertCodeBlock}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-bold hover:scale-105 transition-transform"
+          className="flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white rounded-xl text-sm font-bold hover:scale-105 transition-transform"
         >
           <span>{`</>`}</span> Code
         </button>
@@ -200,10 +309,26 @@ const NewTiptapEditor: React.FC<NewTiptapEditorProps> = ({ content = '', onChang
         >
           <span>🎨</span> Sketch
         </button>
+        <button
+          onClick={insertChart}
+          className="flex items-center gap-2 px-4 py-2 bg-pink-500 text-white rounded-xl text-sm font-bold hover:scale-105 transition-transform"
+        >
+          <span>🎨</span> Chart
+        </button>
+
+        <label className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-xl text-sm font-bold hover:scale-105 transition-transform cursor-pointer">
+          <span>🖼️</span> Image
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageUpload}
+          />
+        </label>
       </div>
 
       {/* <div className="max-w-4xl mx-auto py-12 px-6"> */}
-      <div className="max-w-4xl py-12 px-6">
+      <div className="mx-auto max-w-4xl py-12 px-6">
         <EditorContent
           editor={editor}
           className="rich-text-block prose prose-xl max-w-none focus:outline-none"

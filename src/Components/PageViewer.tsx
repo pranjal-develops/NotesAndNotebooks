@@ -1,51 +1,84 @@
 import React from "react";
-import Editor from "@monaco-editor/react";
-import { Line } from "react-chartjs-2";
-import type { PageDTO } from "./PageEditor";
+import { EditorContent, useEditor } from '@tiptap/react';
+import StarterKit from "@tiptap/starter-kit";
+import { CodeBlockNode, DrawingNode } from "./Editor/Extensions";
+import Underline from "@tiptap/extension-underline";
+import { TextStyle } from '@tiptap/extension-text-style';
+import { Color } from '@tiptap/extension-color';
+import FontFamily from '@tiptap/extension-font-family';
+import BulletList from "@tiptap/extension-bullet-list";
+import OrderedList from "@tiptap/extension-ordered-list";
+import ListItem from "@tiptap/extension-list-item";
+import Image from '@tiptap/extension-image';
+import { Extension } from '@tiptap/core';
 
-type Props = { page: PageDTO | null };
+// Custom Font Size Extension (matching NewTiptapEditor)
+const FontSize = Extension.create({
+  name: 'fontSize',
+  addOptions() {
+    return { types: ['textStyle'] };
+  },
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          fontSize: {
+            default: null,
+            parseHTML: element => element.style.fontSize,
+            renderHTML: attributes => {
+              if (!attributes.fontSize) return {};
+              return { style: `font-size: ${attributes.fontSize}` };
+            },
+          },
+        },
+      },
+    ];
+  },
+});
 
-const PageViewer: React.FC<Props> = ({ page }) => {
-  if (!page) return <div style={{ padding: 24 }}>No page</div>;
+interface PageViewerProps {
+  content: string;
+}
+
+const PageViewer: React.FC<PageViewerProps> = ({ content }) => {
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        heading: false,
+        bulletList: false,
+        orderedList: false,
+      }),
+      BulletList,
+      OrderedList,
+      ListItem,
+      Underline,
+      TextStyle,
+      Color,
+      FontFamily,
+      FontSize,
+      CodeBlockNode,
+      DrawingNode,
+      Image.configure({
+        allowBase64: true,
+        HTMLAttributes: {
+          class: 'rounded-xl border border-slate-200 shadow-sm max-w-full h-auto my-4',
+        },
+      }),
+    ],
+    content: content,
+    editable: false,
+    immediatelyRender: false,
+  });
+
+  if (!editor) return null;
+
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: 12 }}>
-      <h2>{page.title}</h2>
-      <div style={{ border: "1px solid #f0f0f0", padding: 12, marginBottom: 12 }}>
-        <div dangerouslySetInnerHTML={{ __html: page.contentHtml ?? "" }} />
-      </div>
-
-      <div>
-        <h4>Images</h4>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {(page.images ?? []).map((s, i) => <img key={i} src={s} style={{ width: 200 }} />)}
-        </div>
-      </div>
-
-      <div style={{ marginTop: 12 }}>
-        <h4>Drawings</h4>
-        <div style={{ display: "flex", gap: 8 }}>
-          {(page.drawings ?? []).map((d, i) => <img key={i} src={d} style={{ width: 240 }} />)}
-        </div>
-      </div>
-
-      <div style={{ marginTop: 12 }}>
-        <h4>Charts</h4>
-        {(page.charts ?? []).map((c, i) => (
-          <div key={i} style={{ width: 700, height: 320, marginTop: 8 }}>
-            <Line data={(c as any).data} />
-          </div>
-        ))}
-      </div>
-
-      <div style={{ marginTop: 12 }}>
-        <h4>Code</h4>
-        {(page.codeBlocks ?? []).map(cb => (
-          <div key={cb.id} style={{ marginBottom: 12, border: "1px solid #eee" }}>
-            <div style={{ background: "#fafafa", padding: 8, fontSize: 13 }}>{cb.language}</div>
-            <Editor height="200px" language={cb.language} value={cb.code} options={{ readOnly: true, minimap: { enabled: false } }} />
-          </div>
-        ))}
-      </div>
+    <div className="mx-auto max-w-4xl py-12 px-6">
+      <EditorContent
+        editor={editor}
+        className="rich-text-block prose prose-xl max-w-none focus:outline-none dark:prose-invert"
+      />
     </div>
   );
 };

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark-island (&:where(.dark-island, .dark-island *));
 
 @layer base {
   * {
@@ -105,3 +106,14 @@
 .rich-text-block:focus {
   outline: none;
 }
+
+:root {
+  --accent-color: #8b5cf6; /* Default purple */
+  --accent-color-light: rgba(139, 92, 246, 0.1);
+}
+
+/* Custom utility for clean Tailwind usage */
+.text-accent { color: var(--accent-color); }
+.bg-accent { background-color: var(--accent-color); }
+.bg-accent-light { background-color: var(--accent-color-light); }
+.border-accent { border-color: var(--accent-color); }
