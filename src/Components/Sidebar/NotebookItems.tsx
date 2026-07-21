@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { LuNotebookPen, LuNotebookText } from "react-icons/lu";
 import {
   setActiveNotebook,
-//   setActivePage,
+  //   setActivePage,
 } from "../../store/slice/notebookSlice";
 // import { notebookApi } from "../../api";
 // import { setActiveView } from "../../store/slice/uiSlice";
@@ -32,11 +32,10 @@ const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
     }));
   };
 
-   const handlePageClick = () =>{
+  const handlePageClick = () => {
     dispatch(setActiveNotebook(notebook));
     dispatch(setSelectedTag(null));
-    
-  }
+  };
 
   //   Handle Page Selection
   // const handlePageClick = async (notebookId: number, pageId: number) => {
@@ -53,7 +52,6 @@ const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
   //     // dispatch(setActiveView("notebook-content"));
   //     navigate(`/notebooks/${notebookId}/pages/${pageId}`)
 
-
   //   } catch (error) {
   //     console.error("Failed to fetch page", error);
   //   }
@@ -64,40 +62,52 @@ const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
       {/* Notebook Item */}
       <button
         className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-          activeNotebook?.id === notebook.id 
-  ? "bg-(--accent-color-light) text-(--accent-color)" 
-  : "text-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800"
-}`}
+          activeNotebook?.id === notebook.id
+            ? "bg-(--accent-color-light) text-(--accent-color)"
+            : "text-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+        }`}
       >
         <div className="flex items-center gap-3">
           {/* <BsJournalText className={activeNotebook?.id === notebook.id ? 'text-purple-600' : 'text-zinc-400'} /> */}
-          <button 
-          onClick={() => toggleNotebook(notebook.id)}
-          className="cursor-pointer">
+          <button
+            onClick={() => toggleNotebook(notebook.id)}
+            className="cursor-pointer"
+          >
             {notebook.logo ? (
-  <img
-    src={notebook.logo.startsWith("data:") ? notebook.logo : `data:image/png;base64,${notebook.logo}`}
-    alt={`${notebook.name ?? "Notebook"} logo`}
-    className="h-4 w-4 object-contain"
-  />
-) : expandedNotebooks[notebook.id] ? (
-  <LuNotebookPen
-    className={`text-(--accent-color) transition-opacity ${
-      activeNotebook?.id === notebook.id ? "opacity-100" : "opacity-50"
-    }`}
-    size={18}
-  />
-) : (
-  <LuNotebookText
-    className={`text-(--accent-color) transition-opacity ${
-      activeNotebook?.id === notebook.id ? "opacity-100" : "opacity-50"
-    }`}
-    size={18}
-  />
-)}
-
-                </button>
-          <span className="truncate">{notebook.name}</span>
+              <img
+                src={
+                  notebook.logo.startsWith("data:")
+                    ? notebook.logo
+                    : `data:image/png;base64,${notebook.logo}`
+                }
+                alt={`${notebook.name ?? "Notebook"} logo`}
+                className="h-4 w-4 object-contain"
+              />
+            ) : expandedNotebooks[notebook.id] ? (
+              <LuNotebookPen
+                className={`text-(--accent-color) transition-opacity ${
+                  activeNotebook?.id === notebook.id
+                    ? "opacity-100"
+                    : "opacity-50"
+                }`}
+                size={18}
+              />
+            ) : (
+              <LuNotebookText
+                className={`text-(--accent-color) transition-opacity ${
+                  activeNotebook?.id === notebook.id
+                    ? "opacity-100"
+                    : "opacity-50"
+                }`}
+                size={18}
+              />
+            )}
+          </button>
+          <Link
+            to={`/notebooks/${notebook.id}`}
+            onClick={() => handlePageClick()}
+           className="truncate">{notebook.name}
+           </Link>
         </div>
       </button>
 
@@ -117,11 +127,12 @@ const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
               }`}
             >
               <BsFileEarmarkText size={14} />
-              <span className="truncate">{page.title}</span>
+              <span className="truncate">{page.title}
+               </span>
             </Link>
           ))}
           <Link
-            onClick={()=>dispatch(setActiveNotebook(notebook))}
+            onClick={() => dispatch(setActiveNotebook(notebook))}
             to={`/notebooks/${notebook.id}/pages/create`}
             className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-zinc-400 hover:text-(--accent-color) transition-colors"
           >
