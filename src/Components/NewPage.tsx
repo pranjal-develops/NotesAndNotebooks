@@ -1,4 +1,3 @@
-import React from 'react'
 import { BsType, BsCodeSlash, BsPencilFill } from 'react-icons/bs'
 // import DrawingCanvas from './NewCanvas'
 

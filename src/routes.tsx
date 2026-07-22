@@ -2,9 +2,9 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import Home from "./Pages/Home";
 import Notes from "./Components/Notes";
 import CreateNotebook from "./Components/CreateNotebook";
-import PageContainer from "./Components/PageConatiner";
-import NewPageEditor from "./Components/NewPageEditor";
-import NewTiptapPageContainer from "./Components/NewTiptapPageContainer";
+import NewTiptapPageContainer from "./Pages/NewTiptapPageContainer";
+import Notebook from "./Pages/Notebook";
+import EditNotebook from "./Pages/EditNotebook";
 
 export const router = createBrowserRouter([
   {
@@ -24,13 +24,21 @@ export const router = createBrowserRouter([
         element: <CreateNotebook />,
       },
       {
+        path: "notebooks/:notebookId",
+        element: <Notebook />,
+      },
+      {
+        path: "notebooks/:notebookId/edit",
+        element: <EditNotebook />,
+      },
+      {
         path: "notebooks/:notebookId/pages/:pageId",
         element: <NewTiptapPageContainer />,
         // element: <PageContainer />,
       },
       {
         path: "notebooks/:notebookId/pages/create",
-        element: <NewPageEditor />,
+        element: <NewTiptapPageContainer />,
         // element: <PageContainer />,
       },
     ],

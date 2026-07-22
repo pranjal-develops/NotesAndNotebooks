@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type {Notebook, PageDetail, PageSummary} from '../../types'
+import type {Notebook, PageDetail} from '../../types'
 
 interface NotebookState{
     notebooks: Notebook[];

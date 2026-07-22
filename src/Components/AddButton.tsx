@@ -1,4 +1,4 @@
-import React from 'react'
+// import React from 'react'
 import { BsPlusLg } from 'react-icons/bs'
 import { useDispatch } from 'react-redux'
 import { AddNoteTrue } from '../store/slice/noteSlice'

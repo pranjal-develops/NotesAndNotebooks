@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux'
 import type { RootState } from '../store/store'
 import { setSearchText } from '../store/slice/noteSlice'
@@ -26,26 +26,26 @@ const Search = () => {
   return (
           <div className="relative w-full max-w-md group">
   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-    <BsSearch className="text-gray-400 group-focus-within:text-purple-500 transition-colors" />
+    <BsSearch className="text-zinc-400 group-focus-within:text-purple-500 transition-colors" />
   </div>
   <input
     ref={inputRef}
     type="text"
     value={searchText}
-    className="block w-full pl-10 pr-3 py-2 border border-[hsl(0,0%,85%)] dark:border-[hsl(0,0%,15%)] md:border-transparent bg-white dark:bg-[hsl(0,0%,20%)] rounded-xl leading-5 placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-[hsl(0,0%,15%)] focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all sm:text-sm dark:text-gray-100"
+    className="block w-full pl-10 pr-3 py-2 border border-[hsl(0,0%,85%)] dark:border-[hsl(0,0%,15%)] md:border-transparent bg-white dark:bg-[hsl(0,0%,20%)] rounded-xl leading-5 placeholder-zinc-500 focus:outline-none focus:bg-white dark:focus:bg-[hsl(0,0%,15%)] focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all sm:text-sm dark:text-zinc-100"
     placeholder="Search your notes..."
     onChange={(e) => dispatch(setSearchText(e.target.value))}
   />
   {searchText && (
         <button 
           onClick={() => dispatch(setSearchText(''))}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+          className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
         >
           <BsXCircleFill /> {/* Add this icon from react-icons/bs */}
         </button>
       )}
       <div className="absolute inset-y-0 right-3 hidden md:flex items-center pointer-events-none">
-        <kbd className="px-1.5 py-0.5 text-[10px] font-semibold text-gray-400 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md">
+        <kbd className="px-1.5 py-0.5 text-[10px] font-semibold text-zinc-400 bg-zinc-50 dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 rounded-md">
           /
         </kbd>
       </div>

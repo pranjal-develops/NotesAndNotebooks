@@ -1,13 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { BsChevronDown, BsChevronRight, BsPlusLg } from "react-icons/bs";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
 import NotebookItems from "./NotebookItems";
 import {Link} from "react-router-dom";
 
 
 const NotebookSection = () => {
-  const dispatch = useDispatch();
   const { notebooks } = useSelector((state: RootState) => state.notebook);
   const [showNotebooks, setshowNotebooks] = useState(true);
 

@@ -6,8 +6,8 @@ import NotebookSection from "./NotebookSection";
 const MobileSidebar = () => {
   const dispatch = useDispatch();
   return (
-    <div className="md:hidden fixed inset-0 z-40 bg-black/50">
-      <aside className="md:hidden fixed left-0 top-0 bottom-0 w-64 bg-white dark:bg-black p-5 shadow-lg">
+    <div className="md:hidden fixed inset-0 z-40 bg-black/80 backdrop-blur-sm">
+      <aside className="md:hidden fixed left-0 top-0 bottom-0 w-auto max-w-[90%] bg-white dark:bg-black p-5 shadow-lg overflow-hidden">
          <button className="mb-4 p-2 rounded" onClick={() => dispatch(SetSideBarOpen())}>×</button>
         <NotesSection />
         <NotebookSection />

@@ -1,9 +1,16 @@
-import React, { useRef, useEffect, useState, useImperativeHandle, forwardRef } from 'react';
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useImperativeHandle,
+  forwardRef,
+} from "react";
 
 interface DrawingCanvasProps {
   initialData?: string | null;
   onSave?: (data: string) => void;
   initialHeight?: number;
+  width?: number;
 }
 
 export interface CanvasHandle {
@@ -11,233 +18,338 @@ export interface CanvasHandle {
   clear: () => void;
 }
 
-const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(({ initialData, onSave, initialHeight = 300 }, ref) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [color, setColor] = useState('#8b5cf6'); // Default purple
-  const [brushSize, setBrushSize] = useState(5);
-  const [tool, setTool] = useState<'pencil' | 'eraser'>('pencil');
-  const [canvasHeight, setCanvasHeight] = useState(initialHeight);
-  const [isResizing, setIsResizing] = useState(false);
+const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(
+  ({ initialData, onSave, initialHeight = 300, width }, ref) => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Expose methods to parent components (like Add or EditPopUp)
-  useImperativeHandle(ref, () => ({
-    getSaveData: () => {
-      return canvasRef.current?.toDataURL() || '';
-    },
-    clear: () => {
+    const [isDrawing, setIsDrawing] = useState(false);
+    const [color, setColor] = useState("#8b5cf6");
+    const [brushSize, setBrushSize] = useState(5);
+    const [tool, setTool] = useState<"pencil" | "eraser">("pencil");
+    const [canvasHeight, setCanvasHeight] = useState(initialHeight);
+    const [isResizing, setIsResizing] = useState(false);
+
+    // Track last point + pointerId so mouse/touch/pen are consistent
+    const activePointerIdRef = useRef<number | null>(null);
+    const lastPointRef = useRef<{ x: number; y: number } | null>(null);
+
+    // ---------- Canvas sizing (DPR-aware) ----------
+    const resizeCanvasToContainer = (opts?: { preserveDrawing?: boolean }) => {
       const canvas = canvasRef.current;
-      const ctx = canvas?.getContext('2d');
-      if (ctx && canvas) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        if (onSave) onSave('');
-      }
-    }
-  }));
+      if (!canvas) return;
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
-    // Make canvas responsive to its container
-    const resizeCanvas = () => {
       const container = canvas.parentElement;
-      if (container) {
-        // Save current drawing
-        const currentData = canvas.toDataURL();
-        
-        canvas.width = container.clientWidth;
-        canvas.height = canvasHeight;
-        
-        // Redraw current drawing
+      const cssW = width || container?.clientWidth || 800;
+      const cssH = canvasHeight;
+
+      const prev = opts?.preserveDrawing ? canvas.toDataURL() : null;
+
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+
+      canvas.style.width = `${cssW}px`;
+      canvas.style.height = `${cssH}px`;
+      canvas.width = Math.round(cssW * dpr);
+      canvas.height = Math.round(cssH * dpr);
+
+      // Draw in CSS pixels
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+
+      // Restore content if needed
+      if (prev) {
         const img = new Image();
-        img.onload = () => ctx.drawImage(img, 0, 0);
-        img.src = currentData;
+        img.onload = () => {
+          ctx.clearRect(0, 0, cssW, cssH);
+          ctx.drawImage(img, 0, 0, cssW, cssH);
+        };
+        img.src = prev;
+      }
 
-        // If we have initial data (editing a note) and canvas was empty, draw it
-        if (initialData && currentData.length < 1000) { // Simple check if canvas was empty
-          const initImg = new Image();
-          initImg.onload = () => ctx.drawImage(initImg, 0, 0);
-          initImg.src = initialData;
-        }
+      // If initialData exists and we didn't preserve previous content
+      if (initialData && !prev) {
+        const img = new Image();
+        img.onload = () => {
+          ctx.clearRect(0, 0, cssW, cssH);
+          ctx.drawImage(img, 0, 0, cssW, cssH);
+        };
+        img.src = initialData;
       }
     };
 
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-    return () => window.removeEventListener('resize', resizeCanvas);
-  }, [initialData, canvasHeight]);
+    useEffect(() => {
+      resizeCanvasToContainer({ preserveDrawing: false });
 
-  const handleResizing = (e: MouseEvent | TouchEvent) => {
-    if (!isResizing || !canvasRef.current) return;
-    
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    const rect = canvasRef.current.getBoundingClientRect();
-    const newHeight = Math.max(150, clientY - rect.top);
-    setCanvasHeight(newHeight);
-  };
+      const onResize = () => resizeCanvasToContainer({ preserveDrawing: true });
+      window.addEventListener("resize", onResize);
+      return () => window.removeEventListener("resize", onResize);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [canvasHeight, width]);
 
-  useEffect(() => {
-    const stopResizing = () => {
-      if (isResizing) {
-        setIsResizing(false);
-        if (onSave && canvasRef.current) {
-          onSave(canvasRef.current.toDataURL());
+    // Expose methods to parent components (like Add or EditPopUp)
+    useImperativeHandle(ref, () => ({
+      getSaveData: () => canvasRef.current?.toDataURL() || "",
+      clear: () => {
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext("2d");
+        if (ctx && canvas) {
+          const cssW = canvas.style.width
+            ? parseFloat(canvas.style.width)
+            : canvas.width;
+          const cssH = canvas.style.height
+            ? parseFloat(canvas.style.height)
+            : canvas.height;
+          ctx.clearRect(0, 0, cssW, cssH);
+          if (onSave) onSave("");
         }
+      },
+    }));
+
+    // ---------- Pointer coordinates (pen/mouse/touch) ----------
+    const getCanvasPointFromEvent = (
+      e: React.PointerEvent<HTMLCanvasElement>
+    ) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return { x: 0, y: 0 };
+
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      return { x, y };
+    };
+
+    const getStrokeWidthFromEvent = (
+      e: React.PointerEvent<HTMLCanvasElement>
+    ) => {
+      // pressure: 0..1 (0 for non-contact). Fallback for mouse/touch.
+      const pressure =
+        e.pressure && e.pressure > 0 ? e.pressure : 0.5;
+      const scaled = brushSize * (0.5 + pressure);
+      return Math.max(1, scaled);
+    };
+
+    const applyStrokeStyle = (
+      ctx: CanvasRenderingContext2D,
+      e: React.PointerEvent<HTMLCanvasElement>
+    ) => {
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      if (tool === "eraser") {
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.strokeStyle = "rgba(0,0,0,1)";
+      } else {
+        ctx.globalCompositeOperation = "source-over";
+        ctx.strokeStyle = color;
       }
+
+      ctx.lineWidth = getStrokeWidthFromEvent(e);
     };
 
-    if (isResizing) {
-      window.addEventListener('mousemove', handleResizing);
-      window.addEventListener('mouseup', stopResizing);
-      window.addEventListener('touchmove', handleResizing);
-      window.addEventListener('touchend', stopResizing);
-    }
-    return () => {
-      window.removeEventListener('mousemove', handleResizing);
-      window.removeEventListener('mouseup', stopResizing);
-      window.removeEventListener('touchmove', handleResizing);
-      window.removeEventListener('touchend', stopResizing);
-    };
-  }, [isResizing]);
+    // ---------- Drawing handlers (Pointer Events) ----------
+    const startDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
 
-  const getCoordinates = (e: React.MouseEvent | React.TouchEvent) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
-    const rect = canvas.getBoundingClientRect();
-    
-    if ('touches' in e) {
-      return {
-        x: e.touches[0].clientX - rect.left,
-        y: e.touches[0].clientY - rect.top
-      };
-    } else {
-      return {
-        x: e.nativeEvent.offsetX,
-        y: e.nativeEvent.offsetY
-      };
-    }
-  };
+      if (e.cancelable) e.preventDefault();
+      e.stopPropagation();
 
-  const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
-    const { x, y } = getCoordinates(e);
-    const ctx = canvasRef.current?.getContext('2d');
-    if (ctx) {
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.strokeStyle = tool === 'eraser' ? '#ffffff' : color;
-      ctx.lineWidth = brushSize;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+      if (!canvas || !ctx) return;
+
+      activePointerIdRef.current = e.pointerId;
+      lastPointRef.current = getCanvasPointFromEvent(e);
+
       setIsDrawing(true);
-    }
-  };
 
-  const draw = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDrawing) return;
-    const { x, y } = getCoordinates(e);
-    const ctx = canvasRef.current?.getContext('2d');
-    if (ctx) {
-      ctx.lineTo(x, y);
-      ctx.stroke();
-    }
-  };
-
-  const stopDrawing = () => {
-    if (isDrawing) {
-      setIsDrawing(false);
-      const ctx = canvasRef.current?.getContext('2d');
-      if (ctx) ctx.closePath();
-      if (onSave && canvasRef.current) {
-        onSave(canvasRef.current.toDataURL());
+      try {
+        canvas.setPointerCapture(e.pointerId);
+      } catch {
+        // ignore
       }
-    }
-  };
 
-  return (
-    <div className="flex flex-col gap-3 p-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between gap-4 p-2 bg-white dark:bg-gray-900 rounded-lg shadow-sm">
-        <div className="flex items-center gap-2">
+      const p = lastPointRef.current!;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      applyStrokeStyle(ctx, e);
+    };
+
+    const draw = (e: React.PointerEvent<HTMLCanvasElement>) => {
+      if (!isDrawing) return;
+      if (activePointerIdRef.current !== e.pointerId) return;
+
+      if (e.cancelable) e.preventDefault();
+      e.stopPropagation();
+
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+      if (!canvas || !ctx) return;
+
+      const p = getCanvasPointFromEvent(e);
+      const last = lastPointRef.current;
+
+      // Draw segment
+      ctx.beginPath();
+      if (last) ctx.moveTo(last.x, last.y);
+      else ctx.moveTo(p.x, p.y);
+      ctx.lineTo(p.x, p.y);
+
+      applyStrokeStyle(ctx, e);
+      ctx.stroke();
+
+      lastPointRef.current = p;
+    };
+
+    const stopDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
+      if (activePointerIdRef.current !== e.pointerId) return;
+
+      if (e.cancelable) e.preventDefault();
+      e.stopPropagation();
+
+      setIsDrawing(false);
+      activePointerIdRef.current = null;
+      lastPointRef.current = null;
+
+      const canvas = canvasRef.current;
+      if (onSave && canvas) onSave(canvas.toDataURL());
+    };
+
+    // ---------- Resizing handle (Pointer Events) ----------
+    const handleResizePointerDown = (
+      e: React.PointerEvent<HTMLDivElement>
+    ) => {
+      if (e.cancelable) e.preventDefault();
+      e.stopPropagation();
+      setIsResizing(true);
+
+      try {
+        (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
+      } catch {
+        // ignore
+      }
+    };
+
+    const handleResizePointerMove = (
+      e: React.PointerEvent<HTMLDivElement>
+    ) => {
+      if (!isResizing || !canvasRef.current) return;
+
+      const clientY = e.clientY;
+      const rect = canvasRef.current.getBoundingClientRect();
+      const newHeight = Math.max(150, clientY - rect.top);
+      setCanvasHeight(newHeight);
+    };
+
+    const handleResizePointerUp = (
+      e: React.PointerEvent<HTMLDivElement>
+    ) => {
+      if (!isResizing) return;
+
+      if (e.cancelable) e.preventDefault();
+      e.stopPropagation();
+
+      setIsResizing(false);
+      const canvas = canvasRef.current;
+      if (onSave && canvas) onSave(canvas.toDataURL());
+    };
+
+    return (
+      <div className="flex flex-col gap-3 p-2 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-200 dark:border-zinc-700">
+        <div className="flex items-center justify-between gap-4 p-2 bg-white dark:bg-zinc-900 rounded-lg shadow-sm">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setTool("pencil")}
+              className={`p-2 rounded-md ${
+                tool === "pencil"
+                  ? "bg-purple-100 text-purple-600"
+                  : "text-zinc-500"
+              }`}
+            >
+              ✏️
+            </button>
+            <button
+              type="button"
+              onClick={() => setTool("eraser")}
+              className={`p-2 rounded-md ${
+                tool === "eraser"
+                  ? "bg-purple-100 text-purple-600"
+                  : "text-zinc-500"
+              }`}
+            >
+              🧽
+            </button>
+            <input
+              type="color"
+              value={color}
+              onChange={(ev) => setColor(ev.target.value)}
+              className="w-8 h-8 p-0 border-none rounded cursor-pointer"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 flex-1 max-w-[150px]">
+            <span className="text-xs text-zinc-500">Size</span>
+            <input
+              type="range"
+              min="1"
+              max="20"
+              value={brushSize}
+              onChange={(ev) =>
+                setBrushSize(parseInt(ev.target.value, 10))
+              }
+              className="w-full h-1.5 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+            />
+          </div>
+
           <button
             type="button"
-            onClick={() => setTool('pencil')}
-            className={`p-2 rounded-md ${tool === 'pencil' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
+            onClick={() => {
+              const canvas = canvasRef.current;
+              const ctx = canvas?.getContext("2d");
+              if (ctx && canvas) {
+                const cssW = canvas.style.width
+                  ? parseFloat(canvas.style.width)
+                  : canvas.width;
+                const cssH = canvas.style.height
+                  ? parseFloat(canvas.style.height)
+                  : canvas.height;
+                ctx.clearRect(0, 0, cssW, cssH);
+                if (onSave) onSave("");
+              }
+            }}
+            className="text-xs font-medium text-red-500 hover:text-red-600 px-2"
           >
-            ✏️
+            Clear
           </button>
-          <button
-            type="button"
-            onClick={() => setTool('eraser')}
-            className={`p-2 rounded-md ${tool === 'eraser' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
-          >
-            🧽
-          </button>
-          <input
-            type="color"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            className="w-8 h-8 p-0 border-none rounded cursor-pointer"
-          />
-        </div>
-        
-        <div className="flex items-center gap-2 flex-1 max-w-[150px]">
-          <span className="text-xs text-gray-500">Size</span>
-          <input
-            type="range"
-            min="1"
-            max="20"
-            value={brushSize}
-            onChange={(e) => setBrushSize(parseInt(e.target.value))}
-            className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
-          />
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            const canvas = canvasRef.current;
-            const ctx = canvas?.getContext('2d');
-            if (ctx && canvas) {
-              ctx.clearRect(0, 0, canvas.width, canvas.height);
-              if (onSave) onSave('');
-            }
-          }}
-          className="text-xs font-medium text-red-500 hover:text-red-600 px-2"
-        >
-          Clear
-        </button>
-      </div>
+        <div className="relative bg-white rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden touch-none">
+          <canvas
+            ref={canvasRef}
+            className="cursor-crosshair w-full touch-none select-none"
+            onPointerDown={startDrawing}
+            onPointerMove={draw}
+            onPointerUp={stopDrawing}
+            onPointerCancel={stopDrawing}
+            onPointerLeave={stopDrawing}
+          />
 
-      {/* Canvas */}
-      <div className="relative bg-white rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden touch-none">
-        <canvas
-          ref={canvasRef}
-          onMouseDown={startDrawing}
-          onMouseMove={draw}
-          onMouseUp={stopDrawing}
-          onMouseLeave={stopDrawing}
-          onTouchStart={startDrawing}
-          onTouchMove={draw}
-          onTouchEnd={stopDrawing}
-          className="cursor-crosshair w-full"
-        />
-
-        {/* Resize Handle */}
-        <div 
-          onMouseDown={(e) => { e.preventDefault(); setIsResizing(true); }}
-          onTouchStart={(e) => { setIsResizing(true); }}
-          className="h-3 w-full bg-gray-100 dark:bg-gray-800 hover:bg-purple-200 dark:hover:bg-purple-900/50 cursor-ns-resize flex items-center justify-center transition-colors group"
-        >
-          <div className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full group-hover:bg-purple-400 transition-colors" />
+          <div
+            onPointerDown={handleResizePointerDown}
+            onPointerMove={handleResizePointerMove}
+            onPointerUp={handleResizePointerUp}
+            onPointerCancel={handleResizePointerUp}
+            className="h-3 w-full bg-zinc-100 dark:bg-zinc-800 hover:bg-purple-200 dark:hover:bg-purple-900/50 cursor-ns-resize flex items-center justify-center transition-colors group touch-none select-none"
+          >
+            <div className="w-12 h-1 bg-zinc-300 dark:bg-zinc-600 rounded-full group-hover:bg-purple-400 transition-colors" />
+          </div>
         </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
-DrawingCanvas.displayName = 'DrawingCanvas';
-
+DrawingCanvas.displayName = "DrawingCanvas";
 export default DrawingCanvas;
