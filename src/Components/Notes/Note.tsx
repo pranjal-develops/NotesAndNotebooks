@@ -1,6 +1,6 @@
-import React from 'react';
-import type { Note as NoteType } from '../types';
-import { BsPinAngleFill } from 'react-icons/bs';
+import React from "react";
+import type { Note as NoteType } from "../../types";
+import { BsPinAngleFill } from "react-icons/bs";
 
 interface noteProps {
   note: NoteType;
@@ -9,7 +9,7 @@ interface noteProps {
 
 const Note: React.FC<noteProps> = ({ note, onClk }) => {
   // Use the note color or a default
-  const bgColor = note.color || 'transparent';
+  const bgColor = note.color || "transparent";
 
   const relativeDate = (offsetDateTime: string): string => {
     // Parse OffsetDateTime string by letting Date parse the ISO-8601 with offset
@@ -29,27 +29,32 @@ const Note: React.FC<noteProps> = ({ note, onClk }) => {
 
     if (diffMs <= hour) {
       const mins = Math.max(1, Math.floor(diffMs / minute));
-      return `${mins} minute${mins === 1 ? '' : 's'} ago`;
+      return `${mins} minute${mins === 1 ? "" : "s"} ago`;
     }
 
     if (diffMs < 24 * hour) {
       const hrs = Math.floor(diffMs / hour);
-      return `${hrs} hour${hrs === 1 ? '' : 's'} ago`;
+      return `${hrs} hour${hrs === 1 ? "" : "s"} ago`;
     }
 
     const days = Math.floor(diffMs / day);
     if (days <= 30) {
-      return `${days} day${days === 1 ? '' : 's'} ago`;
+      return `${days} day${days === 1 ? "" : "s"} ago`;
     }
 
     // Otherwise return local date string (e.g., "5/4/2026" depending on locale)
     return then.toLocaleDateString();
   };
 
-
   return (
     <div
-      className='group relative flex flex-col p-5 rounded-xl border border-[hsl(0,0%,85%)] dark:border-[hsl(0,0%,20%)] shadow-sm hover:shadow-md dark:shadow-zinc-900 transition-all active:scale-98 duration-150 cursor-pointer overflow-hidden '
+      className="group relative flex flex-col p-5 rounded-xl border transition-all active:scale-98 duration-150 cursor-pointer overflow-hidden shadow-sm hover:shadow-md 
+      border-[hsl(0,0%,85%)]
+      dark:border-[hsl(0,0%,20%)] dark:shadow-zinc-900
+    dark-island:border-[hsl(0,0%,20%)] dark-island:shadow-zinc-900 
+    pitch-black:border-[hsl(0,0%,15%)] pitch-black:shadow-zinc-900 
+
+      "
       style={{ backgroundColor: bgColor }} // Apply dynamic color
       onClick={onClk}
     >
@@ -60,29 +65,40 @@ const Note: React.FC<noteProps> = ({ note, onClk }) => {
       )}
 
       {note.title && (
-        <h2 className={`text-lg font-semibold text-zinc-900 mb-2 line-clamp-2 leading-tight ${bgColor === 'transparent' ? `dark:text-zinc-100`: ``}`}>
+        <h2
+          className={`text-lg font-semibold text-zinc-900 mb-2 line-clamp-2 leading-tight ${bgColor === "transparent" ? `dark:text-zinc-100 dark-island:text-zinc-100 pitch-black:text-zinc-200` : ``}`}
+        >
           {note.title}
         </h2>
       )}
 
-      <div className={`text-zinc-700 text-sm whitespace-pre-wrap wrap-break-word ${bgColor === 'transparent' ? `dark:text-zinc-300` : `` }`}>
+      <div
+        className={`text-zinc-700 text-sm whitespace-pre-wrap wrap-break-word ${bgColor === "transparent" ? `dark:text-zinc-300 dark-island:text-zinc-300 pitch-black:text-zinc-400` : ``}`}
+      >
         {note.description}
       </div>
 
       {note.drawingData && (
         <div className="mt-3 rounded-lg overflow-hidden bg-white/10">
-          <img src={note.drawingData} alt="" className="w-full h-auto object-contain" />
+          <img
+            src={note.drawingData}
+            alt=""
+            className="w-full h-auto object-contain"
+          />
         </div>
       )}
 
       {/* Date indicator for a professional touch */}
       <div className="mt-4 text-[10px] text-zinc-500 font-medium">
-        {note.updatedDate ? `Edited ${relativeDate(note.updatedDate)}` : ''}
+        {note.updatedDate ? `Edited ${relativeDate(note.updatedDate)}` : ""}
       </div>
       {note.tags && note.tags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1">
-          {note.tags.map(tag => (
-            <span key={tag} className="px-2 py-0.5 bg-black/5 dark:bg-white/10 rounded-full text-[10px] font-medium text-zinc-600 dark:text-zinc-400">
+          {note.tags.map((tag) => (
+            <span
+              key={tag}
+              className="px-2 py-0.5 bg-black/5 dark:bg-white/10 dark-island:bg-white/10 rounded-full text-[10px] font-medium text-zinc-600 dark:text-zinc-400 dark-island:text-zinc-400 pitch-black:text-zinc-500"
+            >
               #{tag}
             </span>
           ))}
@@ -92,5 +108,4 @@ const Note: React.FC<noteProps> = ({ note, onClk }) => {
   );
 };
 
-
-export default Note
+export default Note;

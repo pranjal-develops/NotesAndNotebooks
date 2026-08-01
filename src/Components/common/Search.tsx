@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux'
-import type { RootState } from '../store/store'
-import { setSearchText } from '../store/slice/noteSlice'
+import type { RootState } from '../../store/store'
+import { setSearchText } from '../../store/slice/noteSlice'
 import { BsSearch, BsXCircleFill } from 'react-icons/bs'
  
 
@@ -32,20 +32,20 @@ const Search = () => {
     ref={inputRef}
     type="text"
     value={searchText}
-    className="block w-full pl-10 pr-3 py-2 border border-[hsl(0,0%,85%)] dark:border-[hsl(0,0%,15%)] md:border-transparent bg-white dark:bg-[hsl(0,0%,20%)] rounded-xl leading-5 placeholder-zinc-500 focus:outline-none focus:bg-white dark:focus:bg-[hsl(0,0%,15%)] focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all sm:text-sm dark:text-zinc-100"
+    className="block w-full pl-10 pr-3 py-2 border border-[hsl(0,0%,85%)] dark:border-[hsl(0,0%,15%)] dark-island:border-[hsl(0,0%,15%)] md:border-transparent bg-white dark:bg-[hsl(0,0%,20%)] dark-island:bg-[hsl(0,0%,20%)] rounded-xl leading-5 placeholder-zinc-500 focus:outline-none focus:bg-white dark:focus:bg-[hsl(0,0%,15%)] dark-island:focus:bg-[hsl(0,0%,15%)] focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all sm:text-sm dark:text-zinc-100 dark-island:text-zinc-100 pitch-black:text-zinc-100 pitch-black:bg-[hsl(0,0%,20%)] pitch-black:focus:bg-[hsl(0,0%,15%)]  "
     placeholder="Search your notes..."
     onChange={(e) => dispatch(setSearchText(e.target.value))}
   />
   {searchText && (
         <button 
           onClick={() => dispatch(setSearchText(''))}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+          className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 dark-island:hover:text-zinc-200 pitch-black:hover:text-zinc-200"
         >
           <BsXCircleFill /> {/* Add this icon from react-icons/bs */}
         </button>
       )}
       <div className="absolute inset-y-0 right-3 hidden md:flex items-center pointer-events-none">
-        <kbd className="px-1.5 py-0.5 text-[10px] font-semibold text-zinc-400 bg-zinc-50 dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 rounded-md">
+        <kbd className="px-1.5 py-0.5 text-[10px] font-semibold text-zinc-400 bg-zinc-50 dark:bg-zinc-700 dark-island:bg-zinc-700 pitch-black:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 dark-island:border-zinc-600 pitch-black::border-zinc-600 rounded-md">
           /
         </kbd>
       </div>

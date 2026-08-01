@@ -1,20 +1,16 @@
 import { useState } from "react";
-import type { Notebook } from "../../types";
-import type { RootState } from "../../store/store";
+import type { Notebook } from "../../../../types";
+import type { RootState } from "../../../../store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { LuNotebookPen, LuNotebookText } from "react-icons/lu";
 import {
-  setActiveNotebook,
-  //   setActivePage,
-} from "../../store/slice/notebookSlice";
-// import { notebookApi } from "../../api";
-// import { setActiveView } from "../../store/slice/uiSlice";
+  setActiveNotebook
+} from "../../../../store/slice/notebookSlice";
 import { BsFileEarmarkText, BsPlusLg } from "react-icons/bs";
 import { Link } from "react-router-dom";
-import { setSelectedTag } from "../../store/slice/noteSlice";
+import { setSelectedTag } from "../../../../store/slice/noteSlice";
 
 const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
-  // const { notebooks, activeNotebook, activePage } = useSelector(
   const dispatch = useDispatch();
   const { activeNotebook, activePage } = useSelector(
     (state: RootState) => state.notebook,
@@ -22,7 +18,6 @@ const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
   const [expandedNotebooks, setExpandedNotebooks] = useState<
     Record<number, boolean>
   >({});
-  // const dispatch = useDispatch();
 
   //   Toggle Accordion
   const toggleNotebook = (id: number) => {
@@ -37,26 +32,6 @@ const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
     dispatch(setSelectedTag(null));
   };
 
-  //   Handle Page Selection
-  // const handlePageClick = async (notebookId: number, pageId: number) => {
-  //   try {
-  //     // 1. Find the notebook in our state and set it as active
-  //     const notebook = notebooks.find((n) => n.id === notebookId);
-  //     if (notebook) dispatch(setActiveNotebook(notebook));
-
-  //     // 2. Fetch and set the page
-  //     const response = await notebookApi.getPage(notebookId, pageId);
-  //     dispatch(setActivePage(response.data));
-
-  //     // 3. Switch view
-  //     // dispatch(setActiveView("notebook-content"));
-  //     navigate(`/notebooks/${notebookId}/pages/${pageId}`)
-
-  //   } catch (error) {
-  //     console.error("Failed to fetch page", error);
-  //   }
-  // };
-
   return (
     <div key={notebook.id}>
       {/* Notebook Item */}
@@ -64,11 +39,10 @@ const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
         className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors ${
           activeNotebook?.id === notebook.id
             ? "bg-(--accent-color-light) text-(--accent-color)"
-            : "text-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+            : "text-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800 dark-island:hover:bg-zinc-800 pitch-black:hover:bg-zinc-800"
         }`}
       >
         <div className="flex items-center gap-3">
-          {/* <BsJournalText className={activeNotebook?.id === notebook.id ? 'text-purple-600' : 'text-zinc-400'} /> */}
           <button
             onClick={() => toggleNotebook(notebook.id)}
             className="cursor-pointer"
@@ -117,13 +91,12 @@ const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
           {notebook.pages.map((page) => (
             <Link
               key={page.id}
-              // onClick={() => handlePageClick(notebook.id, page.id)
               onClick={() => handlePageClick()}
               to={`/notebooks/${notebook.id}/pages/${page.id}`}
-              className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+              className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md transition-colors hover:text-(--accent-color) ${
                 activePage?.id === page.id
                   ? "text-(--accent-color) bg-(--accent-color-light)"
-                  : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+                  : "text-zinc-500"
               }`}
             >
               <BsFileEarmarkText size={14} />

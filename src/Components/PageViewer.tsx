@@ -77,7 +77,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ content }) => {
     <div className="mx-auto max-w-4xl py-12 px-6">
       <EditorContent
         editor={editor}
-        className="rich-text-block prose prose-xl max-w-none focus:outline-none dark:prose-invert"
+        className="rich-text-block prose prose-xl max-w-none focus:outline-none dark:prose-invert pitch-black:prose-invert"
       />
     </div>
   );

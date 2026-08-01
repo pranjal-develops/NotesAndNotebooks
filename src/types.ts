@@ -8,6 +8,7 @@ export interface Note {
   color?: string;
   pinned?: boolean;
   tags?: string[];
+  drawing?: boolean;
 }
 
 export interface PageSummary {
@@ -16,12 +17,12 @@ export interface PageSummary {
   pageOrder: number;
 }
 
-export interface Notebook{
-  id:number;
+export interface Notebook {
+  id: number;
   name: string;
   description: string;
   color: string;
-  logo?:string;
+  logo?: string;
   pages: PageSummary[];
 }
 
@@ -59,4 +60,21 @@ export interface PageDTO {
   createdDate?: string;
   updatedDate?: string;
   notebook_id?: number;
+}
+
+// export interface HomeContext {
+  // notes: Note[],
+  // loading: boolean,
+  // setEditingnote: React.Dispatch<React.SetStateAction<note | null>>;
+// }
+
+export interface DrawingDto {
+  id: number,
+  createdDate?: string;
+  updatedDate?: string;
+  drawingData?: string;
+  color?: string;
+  pinned?: boolean;
+  tags?: string[];
+  drawing?: boolean;
 }

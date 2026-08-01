@@ -5,6 +5,8 @@ import React, {
   useImperativeHandle,
   forwardRef,
 } from "react";
+import { BsEraserFill } from "react-icons/bs";
+import { MdOutlineDraw } from "react-icons/md";
 
 interface DrawingCanvasProps {
   initialData?: string | null;
@@ -29,11 +31,9 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(
     const [canvasHeight, setCanvasHeight] = useState(initialHeight);
     const [isResizing, setIsResizing] = useState(false);
 
-    // Track last point + pointerId so mouse/touch/pen are consistent
     const activePointerIdRef = useRef<number | null>(null);
     const lastPointRef = useRef<{ x: number; y: number } | null>(null);
 
-    // ---------- Canvas sizing (DPR-aware) ----------
     const resizeCanvasToContainer = (opts?: { preserveDrawing?: boolean }) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -54,11 +54,9 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(
       canvas.width = Math.round(cssW * dpr);
       canvas.height = Math.round(cssH * dpr);
 
-      // Draw in CSS pixels
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.imageSmoothingEnabled = true;
 
-      // Restore content if needed
       if (prev) {
         const img = new Image();
         img.onload = () => {
@@ -68,7 +66,6 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(
         img.src = prev;
       }
 
-      // If initialData exists and we didn't preserve previous content
       if (initialData && !prev) {
         const img = new Image();
         img.onload = () => {
@@ -88,7 +85,6 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [canvasHeight, width]);
 
-    // Expose methods to parent components (like Add or EditPopUp)
     useImperativeHandle(ref, () => ({
       getSaveData: () => canvasRef.current?.toDataURL() || "",
       clear: () => {
@@ -107,32 +103,27 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(
       },
     }));
 
-    // ---------- Pointer coordinates (pen/mouse/touch) ----------
     const getCanvasPointFromEvent = (
-      e: React.PointerEvent<HTMLCanvasElement>
+      e: React.PointerEvent<HTMLCanvasElement>,
     ) => {
       const canvas = canvasRef.current;
       if (!canvas) return { x: 0, y: 0 };
 
       const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      return { x, y };
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     };
 
     const getStrokeWidthFromEvent = (
-      e: React.PointerEvent<HTMLCanvasElement>
+      e: React.PointerEvent<HTMLCanvasElement>,
     ) => {
-      // pressure: 0..1 (0 for non-contact). Fallback for mouse/touch.
-      const pressure =
-        e.pressure && e.pressure > 0 ? e.pressure : 0.5;
+      const pressure = e.pressure && e.pressure > 0 ? e.pressure : 0.5;
       const scaled = brushSize * (0.5 + pressure);
       return Math.max(1, scaled);
     };
 
     const applyStrokeStyle = (
       ctx: CanvasRenderingContext2D,
-      e: React.PointerEvent<HTMLCanvasElement>
+      e: React.PointerEvent<HTMLCanvasElement>,
     ) => {
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
@@ -148,7 +139,6 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(
       ctx.lineWidth = getStrokeWidthFromEvent(e);
     };
 
-    // ---------- Drawing handlers (Pointer Events) ----------
     const startDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
       if (e.pointerType === "mouse" && e.button !== 0) return;
 
@@ -190,7 +180,6 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(
       const p = getCanvasPointFromEvent(e);
       const last = lastPointRef.current;
 
-      // Draw segment
       ctx.beginPath();
       if (last) ctx.moveTo(last.x, last.y);
       else ctx.moveTo(p.x, p.y);
@@ -216,10 +205,7 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(
       if (onSave && canvas) onSave(canvas.toDataURL());
     };
 
-    // ---------- Resizing handle (Pointer Events) ----------
-    const handleResizePointerDown = (
-      e: React.PointerEvent<HTMLDivElement>
-    ) => {
+    const handleResizePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
       if (e.cancelable) e.preventDefault();
       e.stopPropagation();
       setIsResizing(true);
@@ -231,9 +217,7 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(
       }
     };
 
-    const handleResizePointerMove = (
-      e: React.PointerEvent<HTMLDivElement>
-    ) => {
+    const handleResizePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
       if (!isResizing || !canvasRef.current) return;
 
       const clientY = e.clientY;
@@ -242,9 +226,7 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(
       setCanvasHeight(newHeight);
     };
 
-    const handleResizePointerUp = (
-      e: React.PointerEvent<HTMLDivElement>
-    ) => {
+    const handleResizePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
       if (!isResizing) return;
 
       if (e.cancelable) e.preventDefault();
@@ -256,31 +238,67 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(
     };
 
     return (
-      <div className="flex flex-col gap-3 p-2 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-200 dark:border-zinc-700">
-        <div className="flex items-center justify-between gap-4 p-2 bg-white dark:bg-zinc-900 rounded-lg shadow-sm">
+      <div
+        className="
+          flex flex-col gap-3 p-2
+          bg-zinc-50
+          dark:bg-zinc-800/50
+          dark-island:bg-zinc-800/50
+          rounded-xl
+          border
+          border-zinc-200
+          dark:border-zinc-700
+          dark-island:border-zinc-700
+        "
+      >
+        <div
+          className="
+            flex items-center justify-between gap-4 p-2
+            bg-white
+            dark:bg-zinc-900
+            dark-island:bg-zinc-900
+            rounded-lg shadow-sm
+          "
+        >
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setTool("pencil")}
-              className={`p-2 rounded-md ${
-                tool === "pencil"
-                  ? "bg-purple-100 text-purple-600"
-                  : "text-zinc-500"
-              }`}
+              className={`p-2 rounded-md text-2xl ${tool === "pencil"
+                ? `
+                    bg-purple-100 text-purple-600
+                    dark:bg-purple-100 dark:text-purple-600
+                    dark-island:bg-purple-100 dark-island:text-purple-600
+                  `
+                : `
+                    text-zinc-500 hover:text-zinc-700
+                    dark:text-zinc-500 dark:hover:text-zinc-200
+                    dark-island:text-zinc-500 dark-island:hover:text-zinc-200
+                  `
+                }`}
             >
-              ✏️
+              <MdOutlineDraw />
             </button>
+
             <button
               type="button"
               onClick={() => setTool("eraser")}
-              className={`p-2 rounded-md ${
-                tool === "eraser"
-                  ? "bg-purple-100 text-purple-600"
-                  : "text-zinc-500"
-              }`}
+              className={`p-2 rounded-md text-2xl ${tool === "eraser"
+                ? `
+                    bg-purple-100 text-purple-600
+                    dark:bg-purple-100 dark:text-purple-600
+                    dark-island:bg-purple-100 dark-island:text-purple-600
+                  `
+                : `
+                    text-zinc-500 hover:text-zinc-700
+                    dark:text-zinc-500 dark:hover:text-zinc-200
+                    dark-island:text-zinc-500 dark-island:hover:text-zinc-200
+                  `
+                }`}
             >
-              🧽
+              <BsEraserFill />
             </button>
+
             <input
               type="color"
               value={color}
@@ -289,16 +307,14 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(
             />
           </div>
 
-          <div className="flex items-center gap-2 flex-1 max-w-[150px]">
+          <div className="flex items-center gap-2 flex-1 max-w-37.5">
             <span className="text-xs text-zinc-500">Size</span>
             <input
               type="range"
               min="1"
               max="20"
               value={brushSize}
-              onChange={(ev) =>
-                setBrushSize(parseInt(ev.target.value, 10))
-              }
+              onChange={(ev) => setBrushSize(parseInt(ev.target.value, 10))}
               className="w-full h-1.5 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
             />
           </div>
@@ -319,13 +335,26 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(
                 if (onSave) onSave("");
               }
             }}
-            className="text-xs font-medium text-red-500 hover:text-red-600 px-2"
+            className="
+              text-xs font-medium text-red-500 hover:text-red-600 px-2
+            "
           >
             Clear
           </button>
         </div>
 
-        <div className="relative bg-white rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden touch-none">
+        <div
+          className="
+            relative
+            bg-white
+            rounded-lg
+            border border-zinc-200
+            dark:border-zinc-700
+            dark-island:border-zinc-700
+            overflow-hidden
+            touch-none
+          "
+        >
           <canvas
             ref={canvasRef}
             className="cursor-crosshair w-full touch-none select-none"
@@ -341,14 +370,34 @@ const DrawingCanvas = forwardRef<CanvasHandle, DrawingCanvasProps>(
             onPointerMove={handleResizePointerMove}
             onPointerUp={handleResizePointerUp}
             onPointerCancel={handleResizePointerUp}
-            className="h-3 w-full bg-zinc-100 dark:bg-zinc-800 hover:bg-purple-200 dark:hover:bg-purple-900/50 cursor-ns-resize flex items-center justify-center transition-colors group touch-none select-none"
+            className="
+              h-3 w-full
+              bg-zinc-100
+              dark:bg-zinc-800
+              dark-island:bg-zinc-800
+              hover:bg-purple-200
+              dark:hover:bg-purple-900/50
+              dark-island:hover:bg-purple-900/50
+              cursor-ns-resize
+              flex items-center justify-center
+              transition-colors group
+              touch-none select-none
+            "
           >
-            <div className="w-12 h-1 bg-zinc-300 dark:bg-zinc-600 rounded-full group-hover:bg-purple-400 transition-colors" />
+            <div
+              className="
+                w-12 h-1
+                rounded-full group-hover:bg-purple-400 transition-colors
+                bg-zinc-300
+                dark:bg-zinc-600
+                dark-island:bg-zinc-600
+              "
+            />
           </div>
         </div>
       </div>
     );
-  }
+  },
 );
 
 DrawingCanvas.displayName = "DrawingCanvas";
