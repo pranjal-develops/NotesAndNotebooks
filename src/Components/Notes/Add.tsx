@@ -1,14 +1,14 @@
 import axios from 'axios'
 import React, { useState, useRef } from 'react'
 import { useDispatch } from 'react-redux'
-import { AddNoteFalse } from '../store/slice/noteSlice';
-import DrawingCanvas, { type CanvasHandle } from './Canvas';
+import { AddNoteFalse } from '../../store/slice/noteSlice';
+import DrawingCanvas, { type CanvasHandle } from '../common/Canvas';
 import { BsPinAngleFill } from 'react-icons/bs';
-import type { Note as note } from '../types';
+import { useHandleEvents } from '../../hooks/useHandleEvents';
 
-interface AddProps {
-  onAdd: (note: note, meta?: { tempId?: number; shouldRemove?: boolean }) => void;
-}
+// interface AddProps {
+//   handleOptimisticAdd: (note: note, meta?: { tempId?: number; shouldRemove?: boolean }) => void;
+// }
 
 const COLORS = [
   { name: 'Default', value: 'transparent' },
@@ -23,7 +23,8 @@ const COLORS = [
   { name: 'Pink', value: '#fdcfe8' },
 ];
 
-const Add: React.FC<AddProps> = ({ onAdd }) => {
+// const Add: React.FC<AddProps> = ({ handleOptimisticAdd }) => {
+const Add = () => {
   const dispatch = useDispatch();
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -33,6 +34,7 @@ const Add: React.FC<AddProps> = ({ onAdd }) => {
   const [pinned, setPinned] = useState(false);
   const [tagInput, setTagInput] = useState("")
   const [tags, setTags] = useState<string[]>([]);
+  const {handleOptimisticAdd} = useHandleEvents();
 
   const addTag = (e: React.KeyboardEvent) => {
     if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
@@ -65,16 +67,16 @@ const Add: React.FC<AddProps> = ({ onAdd }) => {
       tags,
       isOptimistic: true
     };
-    onAdd(optimisticNote);
+    handleOptimisticAdd(optimisticNote);
     closePopup();
     try {
       // Send to server WITHOUT the temp ID
       const { id: _, ...noteDataWithoutId } = optimisticNote;
       const response = await axios.post(`${import.meta.env.VITE_API_BASE}/notes`, noteDataWithoutId);
       // Swap temp note with real note from server (which has the real DB ID)
-      onAdd(response.data, { tempId });
+      handleOptimisticAdd(response.data, { tempId });
     } catch (error) {
-      onAdd(optimisticNote, { shouldRemove: true });
+      handleOptimisticAdd(optimisticNote, { shouldRemove: true });
       console.log(error);
     }
   };
@@ -101,23 +103,24 @@ const Add: React.FC<AddProps> = ({ onAdd }) => {
   /* Desktop: Centered */
   md:relative md:bottom-auto md:rounded-2xl 
   
-  bg-white dark:bg-zinc-900 shadow-2xl overflow-hidden transform transition-all duration-300 md:duration-150 ease-out
+  shadow-2xl overflow-hidden transform transition-all duration-300 md:duration-150 ease-out
+  bg-white dark:bg-zinc-900 dark-island:bg-zinc-900
   ${isClosing ? 'translate-y-full md:translate-y-0 md:scale-95 md:opacity-0' : 'translate-y-0 md:scale-100 md:opacity-100'}`}
         style={{
           backgroundColor: color !== 'transparent' ? color : undefined
         }}
       >
         {/* Drag Handle for Mobile */}
-        <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mt-3 mb-1 md:hidden" />
+        <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 dark-island:bg-zinc-700 rounded-full mx-auto mt-3 mb-1 md:hidden" />
         <div className="flex-col">
           {/* <div className="px-6 py-4 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-800"> */}
           {/* <div className="px-6 py-4 flex items-center justify-between"> */}
           {/* <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Add New Note</h2> */}
           <div className="sticky top-0 z-10 px-6 py-4 flex items-center justify-between ">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-700/80 dark:text-white/80">Add New Note</h2>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-700/80 dark:text-white/80 dark-island:text-white/80">Add New Note</h2>
             <button
               onClick={closePopup}
-              className="text-zinc-400 hover:text-zinc-500 dark:hover:text-zinc-300 transition-colors"
+              className="text-zinc-400 hover:text-zinc-500 dark:hover:text-zinc-300 dark-island:hover:text-zinc-300 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
@@ -152,34 +155,34 @@ const Add: React.FC<AddProps> = ({ onAdd }) => {
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800">
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark-island:text-zinc-300 mb-1">
                 Title{' '}
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Enter note title..."
-                  className="w-full text-2xl font-bold bg-transparent border-none outline-none placeholder-zinc-400 dark:text-zinc-100"
+                  className="w-full text-2xl font-bold bg-transparent border-none outline-none placeholder-zinc-400 dark:text-zinc-100 dark-island:text-zinc-100"
                   // className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all text-zinc-900 dark:text-zinc-100 placeholder-zinc-400"
                   autoFocus
                 />
               </label>
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark-island:text-zinc-300 mb-1">
                 Description{' '}
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Write your thoughts..."
                   rows={4}
-                  className="w-full px-4 py-2 bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-(--accent-color)/20 focus:border-(--accent-color) outline-none transition-all text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 resize-none"
+                  className="w-full px-4 py-2 bg-zinc-50/50 dark:bg-zinc-800/40 dark-island:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700 dark-island:border-zinc-700 rounded-lg focus:ring-2 focus:ring-(--accent-color)/20 focus:border-(--accent-color) outline-none transition-all text-zinc-900 dark:text-zinc-100 dark-island:text-zinc-100 placeholder-zinc-400 resize-none"
                 />
               </label>
             </div>
             <div className="space-y-2">
               <label className="text-xs font-semibold text-zinc-500 uppercase">Tags</label>
-              <div className="flex flex-wrap gap-2 p-2 border border-zinc-100 dark:border-zinc-800 rounded-lg bg-zinc-50/50 dark:bg-zinc-800/40 dark:text-white/50">
+              <div className="flex flex-wrap gap-2 p-2 border border-zinc-100 dark:border-zinc-800 dark-island:border-zinc-800 rounded-lg bg-zinc-50/50 dark:bg-zinc-800/40 dark-island:bg-zinc-800/40 dark:text-white/50 dark-island:text-white/50">
                 {tags.map(tag => (
                   <span key={tag} className="flex items-center gap-1 px-2 py-1 bg-(--accent-color-light) text-(--accent-color) rounded-md text-xs">
                     {tag}
@@ -200,7 +203,7 @@ const Add: React.FC<AddProps> = ({ onAdd }) => {
               <button
                 type="button"
                 onClick={() => setShowCanvas(!showCanvas)}
-                className="flex items-center gap-2 text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors group"
+                className="flex items-center gap-2 text-sm font-medium text-purple-600 dark:text-purple-400 dark-island:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 dark-island:hover:text-purple-300 transition-colors group"
               >
                 <span className="text-lg group-hover:scale-110 transition-transform">
                   {showCanvas ? '−' : '+'}
@@ -216,11 +219,11 @@ const Add: React.FC<AddProps> = ({ onAdd }) => {
             </div>
           </div>
 
-          <div className="mt-8 flex items-center justify-end gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+          <div className="mt-8 flex items-center justify-end gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800 dark-island:border-zinc-800">
             <button
               type="button"
               onClick={closePopup}
-              className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-600 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all"
+              className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark-island:text-zinc-300 bg-white dark:bg-zinc-800 dark-island:bg-zinc-800 border border-zinc-300 dark:border-zinc-600 dark-island:border-zinc-600 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 dark-island:hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all"
             >
               Cancel
             </button>

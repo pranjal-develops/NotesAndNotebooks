@@ -1,5 +1,5 @@
 import { NodeViewWrapper } from '@tiptap/react';
-import DrawingCanvas from '../Canvas';
+import DrawingCanvas from '../common/Canvas';
 import { BsTrash } from 'react-icons/bs';
 
 const DrawingWidget = ({ node, updateAttributes, deleteNode, editor }: any) => {
@@ -14,7 +14,7 @@ const DrawingWidget = ({ node, updateAttributes, deleteNode, editor }: any) => {
     return (
       <NodeViewWrapper className="drawing-widget my-6">
         <div 
-          className="mx-auto overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
+          className="mx-auto overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-zinc-800 dark-island:border-zinc-800 dark:bg-zinc-950 dark-island:bg-zinc-950"
           style={{ maxWidth: '100%', width: width }}
         >
           {dataUrl ? (

@@ -1,14 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { notebookApi } from "../api";
-import type { PageSummary } from "../types";
-import { Button, Card, Skeleton } from "../Components/ui/Primitives";
+import { notebookApi } from "../../api";
+import type { PageSummary } from "../../types";
+import { Button, Card, Input, Skeleton, Textarea } from "../ui/Primitives";
 import { BsTrash } from "react-icons/bs";
-import type { RootState } from "../store/store";
+import type { RootState } from "../../store/store";
 import { useSelector, useDispatch } from "react-redux";
-// Add the slice actions
-import { setActiveNotebook, setNotebooks } from "../store/slice/notebookSlice";
-
+import {
+  setActiveNotebook,
+  setNotebooks,
+} from "../../store/slice/notebookSlice";
 
 const EditNotebook = () => {
   const { notebookId } = useParams<{ notebookId: string }>();
@@ -56,7 +57,6 @@ const EditNotebook = () => {
     }
   };
 
-
   const PRESETS = [
     { name: "Purple", value: "#8b5cf6" },
     { name: "Blue", value: "#3b82f6" },
@@ -65,10 +65,6 @@ const EditNotebook = () => {
     { name: "Red", value: "#ef4444" },
     { name: "Pink", value: "#ec4899" },
   ];
-
-  const accentColor = useMemo(() => {
-    return color || "#8b5cf6";
-  }, [color]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -100,7 +96,10 @@ const EditNotebook = () => {
       };
 
       // Update notebook on backend
-      const response = await notebookApi.updateNotebook(parseInt(notebookId), payload);
+      const response = await notebookApi.updateNotebook(
+        parseInt(notebookId),
+        payload,
+      );
 
       // Update active notebook in Redux
       dispatch(setActiveNotebook(response.data));
@@ -118,7 +117,6 @@ const EditNotebook = () => {
       setIsSaving(false);
     }
   };
-
 
   useEffect(() => {
     if (notebookId) {
@@ -152,29 +150,24 @@ const EditNotebook = () => {
   useEffect(() => {
     return () => {
       // Revert site-wide accent color if user exits/cancels without saving
-      if (!isSavingRef.current && activeNotebookRef.current && initialColorRef.current) {
+      if (
+        !isSavingRef.current &&
+        activeNotebookRef.current &&
+        initialColorRef.current
+      ) {
         dispatch(
           setActiveNotebook({
             ...activeNotebookRef.current,
             color: initialColorRef.current,
-          })
+          }),
         );
       }
     };
   }, [dispatch]);
 
-
   if (loading) {
     return (
-      <div
-        className="notebook-container min-h-screen"
-        style={
-          {
-            "--accent-color": accentColor,
-            "--accent-color-light": `${accentColor}15`,
-          } as React.CSSProperties
-        }
-      >
+      <div className="notebook-container min-h-screen">
         <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6">
           <Card className="space-y-4 p-6">
             <Skeleton
@@ -200,26 +193,21 @@ const EditNotebook = () => {
       </div>
     );
   }
-
   return (
-    <div
-      className="space-y-6"
-      style={
-        {
-          "--accent-color": accentColor,
-          "--accent-color-light": `${accentColor}15`,
-        } as React.CSSProperties
-      }
-    >
+    <div className="space-y-6">
       {/* Header */}
       <Card className="overflow-hidden p-4 sm:p-6 mb-5">
         <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           {/* Logo Uploader */}
           <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-2xl border-2 border-dashed border-zinc-200 dark:border-zinc-700 flex items-center justify-center overflow-hidden bg-zinc-50 dark:bg-zinc-800 shrink-0">
+            <div className="h-16 w-16 rounded-2xl border-2 border-dashed border-zinc-200 dark:border-zinc-700 dark-island:border-zinc-700 pitch-black:border-zinc-700 flex items-center justify-center overflow-hidden bg-zinc-50 dark:bg-zinc-800 dark-island:bg-zinc-800 pitch-black:bg-zinc-800 shrink-0">
               {logo ? (
                 <img
-                  src={logo.startsWith("data:") ? logo : `data:image/png;base64,${logo}`}
+                  src={
+                    logo.startsWith("data:")
+                      ? logo
+                      : `data:image/png;base64,${logo}`
+                  }
                   alt="Logo Preview"
                   className="h-full w-full object-cover"
                 />
@@ -230,7 +218,7 @@ const EditNotebook = () => {
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="logo-upload"
-                className="cursor-pointer px-3 py-1.5 text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 rounded-xl transition-colors text-center text-zinc-700 dark:text-zinc-300"
+                className="cursor-pointer px-3 py-1.5 text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark-island:bg-zinc-800 pitch-black:bg-zinc-800 dark:hover:bg-zinc-700 dark-island:hover:bg-zinc-700 pitch-black:hover:bg-zinc-700 rounded-xl transition-colors text-center text-zinc-700 dark:text-zinc-300 dark-island:text-zinc-300 pitch-black:text-zinc-300"
               >
                 Upload Logo
               </label>
@@ -245,7 +233,7 @@ const EditNotebook = () => {
                 <button
                   type="button"
                   onClick={() => setLogo("")} // Use empty string to signal removal
-                  className="px-3 py-1.5 text-xs font-semibold text-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:hover:bg-red-900/30 rounded-xl transition-colors"
+                  className="px-3 py-1.5 text-xs font-semibold text-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark-island:bg-red-950/30 pitch-black:bg-red-950/30 dark:hover:bg-red-900/30 dark-island:hover:bg-red-900/30 pitch-black:hover:bg-red-900/30 rounded-xl transition-colors"
                 >
                   Remove Logo
                 </button>
@@ -255,8 +243,10 @@ const EditNotebook = () => {
 
           {/* Title */}
           <div className="flex-1">
-            <input type="text" value={title}
-              onChange={e => setTitle(e.target.value)}
+            <Input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               className="text-3xl sm:text-4xl w-full font-bold wrap-break-word leading-tight text-center md:text-left"
             />
           </div>
@@ -280,7 +270,7 @@ const EditNotebook = () => {
       {/* Body */}
       <Card className="overflow-hidden p-4 sm:p-8">
         {/* Color Selector */}
-        <div className="space-y-3 mb-8 pb-6 border-b border-zinc-100 dark:border-zinc-800">
+        <div className="space-y-3 mb-8 pb-6 border-b border-zinc-100 dark:border-zinc-800 dark-island:border-zinc-800 pitch-black:border-zinc-800">
           <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
             Theme Color
           </label>
@@ -290,16 +280,17 @@ const EditNotebook = () => {
                 key={c.value}
                 type="button"
                 onClick={() => handleColorChange(c.value)}
-                className={`w-10 h-10 rounded-xl transition-all transform hover:scale-110 ${color === c.value
-                  ? "ring-4 ring-(--accent-color)/30 scale-110 border-2 border-white dark:border-zinc-900 shadow-md"
-                  : "border border-zinc-200 dark:border-zinc-700"
-                  }`}
+                className={`w-10 h-10 rounded-xl transition-all transform hover:scale-110 ${
+                  color === c.value
+                    ? "ring-4 ring-(--accent-color)/30 scale-110 border-2 border-white dark:border-zinc-900 dark-island:border-zinc-900 pitch-black:border-zinc-900 shadow-md"
+                    : "border border-zinc-200 dark:border-zinc-700 dark-island:border-zinc-700 pitch-black:border-zinc-700"
+                }`}
                 style={{ backgroundColor: c.value }}
                 title={c.name}
               />
             ))}
             {/* Custom Color Picker */}
-            <div className="relative w-10 h-10 rounded-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden flex items-center justify-center bg-zinc-50 dark:bg-zinc-800 hover:scale-110 transition-transform">
+            <div className="relative w-10 h-10 rounded-xl border border-zinc-200 dark:border-zinc-700 dark-island:border-zinc-700 pitch-black:border-zinc-700 overflow-hidden flex items-center justify-center bg-zinc-50 dark:bg-zinc-800 dark-island:bg-zinc-800 pitch-black:bg-zinc-800 hover:scale-110 transition-transform">
               <input
                 type="color"
                 value={color}
@@ -312,17 +303,18 @@ const EditNotebook = () => {
         </div>
         {/* ... remaining textarea ... */}
 
-        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-5">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-5 pitch-black:text-white">
           Description
         </h1>
-        <textarea value={description} onChange={e => setDescription(e.target.value)}
-          className="w-full h-40 p-5 bg-white dark:bg-zinc-800 rounded-xl border-2 border-zinc-50 dark:border-zinc-700"
+        <Textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="w-full h-40 p-5 bg-white dark:bg-zinc-800 dark-island:bg-zinc-800 pitch-black:bg-zinc-800 rounded-xl border-2 border-zinc-50 dark:border-zinc-700 dark-island:border-zinc-700 pitch-black:border-zinc-700"
         />
-
 
         {pages !== undefined && (
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold my-4 sm:my-5">
+            <h1 className="text-2xl sm:text-3xl font-bold my-4 sm:my-5 pitch-black:text-white">
               Pages
             </h1>
 
@@ -334,10 +326,13 @@ const EditNotebook = () => {
                   onDragStart={(e) => handleDragStart(e, index)}
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDragEnd={handleDragEnd}
-                  className={`flex items-center justify-between gap-3 bg-white dark:bg-zinc-800 px-4 py-2 rounded-xl border-2 border-zinc-50 dark:border-zinc-700 group cursor-grab active:cursor-grabbing transition-all duration-200 ${draggedIndex === index ? "opacity-40 border-dashed border-(--accent-color)" : ""
-                    }`}
+                  className={`flex items-center justify-between gap-3 bg-white dark:bg-zinc-800 dark-island:bg-zinc-800 pitch-black:bg-zinc-800 px-4 py-2 rounded-xl border-2 border-zinc-50 dark:border-zinc-700 dark-island:border-zinc-700 pitch-black:border-zinc-700 group cursor-grab active:cursor-grabbing transition-all duration-200 ${
+                    draggedIndex === index
+                      ? "opacity-40 border-dashed border-(--accent-color)"
+                      : ""
+                  }`}
                 >
-                  <span className="text-zinc-700 dark:text-zinc-300 flex items-center gap-3 min-w-0 pointer-events-none">
+                  <span className="text-zinc-700 dark:text-zinc-300 dark-island:text-zinc-300 pitch-black:text-zinc-300 flex items-center gap-3 min-w-0 pointer-events-none">
                     <span className="text-xs font-mono text-zinc-400 shrink-0">
                       {index + 1}.
                     </span>
@@ -360,7 +355,7 @@ const EditNotebook = () => {
               ))}
 
               {pages.length === 0 && (
-                <p className="text-sm text-zinc-400 italic text-center py-4 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-xl">
+                <p className="text-sm text-zinc-400 italic text-center py-4 border-2 border-dashed border-zinc-100 dark:border-zinc-800 dark-island:border-zinc-800 pitch-black:border-zinc-800 rounded-xl">
                   No pages added yet.
                 </p>
               )}

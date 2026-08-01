@@ -1,24 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { notebookApi } from "../api";
-import type { PageSummary } from "../types";
-import { Button, Card, Skeleton } from "../Components/ui/Primitives";
+import { notebookApi } from "../../api";
+import type { PageSummary } from "../../types";
+import { Button, Card, Skeleton } from "../../Components/ui/Primitives";
 import { BsTrash } from "react-icons/bs";
-import type { RootState } from "../store/store";
-import { useSelector } from "react-redux";
 
 const Notebook = () => {
   const { notebookId } = useParams<{ notebookId: string }>();
-  const { activeNotebook } = useSelector((state: RootState) => state.notebook);
   const [loading, setLoading] = useState<boolean>(false);
   const [title, setTitle] = useState<string>("Notebook Name");
   const [description, setDescription] = useState<string>("Description");
   const [logo, setLogo] = useState<string | null>();
   const [pages, setPages] = useState<PageSummary[]>();
-
-  const accentColor = useMemo(() => {
-    return activeNotebook?.color || "#8b5cf6";
-  }, [activeNotebook]);
 
   useEffect(() => {
     if (notebookId) {
@@ -36,15 +29,7 @@ const Notebook = () => {
 
   if (loading) {
     return (
-      <div
-        className="notebook-container min-h-screen"
-        style={
-          {
-            "--accent-color": accentColor,
-            "--accent-color-light": `${accentColor}15`,
-          } as React.CSSProperties
-        }
-      >
+      <div className="notebook-container min-h-screen">
         <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6">
           <Card className="space-y-4 p-6">
             <Skeleton
@@ -56,16 +41,7 @@ const Notebook = () => {
               style={{ backgroundColor: "var(--accent-color-light)" }}
             />
           </Card>
-          <Card className="space-y-4 p-6">
-            <Skeleton
-              className="h-14 w-full"
-              style={{ backgroundColor: "var(--accent-color-light)" }}
-            />
-            <Skeleton
-              className="h-96 w-full rounded-[28px]"
-              style={{ backgroundColor: "var(--accent-color-light)" }}
-            />
-          </Card>
+          ...
         </div>
       </div>
     );
@@ -93,7 +69,7 @@ const Notebook = () => {
 
           {/* Title */}
           <div className="flex-1">
-            <div className="text-3xl sm:text-4xl font-bold wrap-break-word leading-tight text-center md:text-left">
+            <div className="text-3xl sm:text-4xl font-bold wrap-break-word leading-tight text-center md:text-left pitch-black:text-white">
               {title}
             </div>
           </div>
@@ -107,11 +83,7 @@ const Notebook = () => {
                 borderColor: "var(--accent-color)",
               }}
             >
-              <Link
-              to={`/notebooks/${notebookId}/edit`}
-              >
-              Edit
-              </Link>
+              <Link to={`/notebooks/${notebookId}/edit`}>Edit</Link>
             </Button>
           </div>
         </div>
@@ -119,14 +91,14 @@ const Notebook = () => {
 
       {/* Body */}
       <Card className="overflow-hidden p-4 sm:p-8">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-5">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-5 pitch-black:text-white">
           Description
         </h1>
-        <p className="text-sm sm:text-base leading-relaxed">{description}</p>
+        <p className="text-sm sm:text-base leading-relaxed pitch-black:text-white">{description}</p>
 
         {pages !== undefined && (
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold my-4 sm:my-5">
+            <h1 className="text-2xl sm:text-3xl font-bold my-4 sm:my-5 pitch-black:text-white">
               Pages
             </h1>
 
@@ -134,9 +106,9 @@ const Notebook = () => {
               {pages.map((p) => (
                 <div
                   key={p.pageOrder}
-                  className="flex items-center justify-between gap-3 bg-white dark:bg-zinc-800 px-4 py-2 rounded-xl border-2 border-zinc-50 dark:border-zinc-700 group animate-in slide-in-from-left-2 duration-200"
+                  className="flex items-center justify-between gap-3 bg-white dark:bg-zinc-800 dark-island:bg-zinc-800 pitch-black:bg-zinc-800 px-4 py-2 rounded-xl border-2 border-zinc-50 dark:border-zinc-700 dark-island:border-zinc-700 pitch-black:border-zinc-700 group animate-in slide-in-from-left-2 duration-200"
                 >
-                  <span className="text-zinc-700 dark:text-zinc-300 flex items-center gap-3 min-w-0">
+                  <span className="text-zinc-700 dark:text-zinc-300 dark-island:text-zinc-300 pitch-black:text-zinc-300 flex items-center gap-3 min-w-0">
                     <span className="text-xs font-mono text-zinc-400 shrink-0">
                       {p.pageOrder + 1}.
                     </span>
@@ -161,7 +133,7 @@ const Notebook = () => {
               ))}
 
               {pages.length === 0 && (
-                <p className="text-sm text-zinc-400 italic text-center py-4 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-xl">
+                <p className="text-sm text-zinc-400 italic text-center py-4 border-2 border-dashed border-zinc-100 dark:border-zinc-800 dark-island:border-zinc-800 pitch-black:border-zinc-800 rounded-xl">
                   No pages added yet.
                 </p>
               )}
