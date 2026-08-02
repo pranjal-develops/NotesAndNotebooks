@@ -13,7 +13,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/notes" replace />,
+        element: <Navigate to="notes" replace />,
       },
       {
         path: "notes",
@@ -41,4 +41,6 @@ export const router = createBrowserRouter([
       },
     ],
   },
-]);
+],{
+  basename: "/NotesAndNotebooks"
+});

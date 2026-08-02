@@ -8,6 +8,7 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
+  base: "/NotesAndNotebooks/",
   resolve: {
     dedupe: ['react', 'react-dom'],
   },
