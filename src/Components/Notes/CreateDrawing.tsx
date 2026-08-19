@@ -1,20 +1,14 @@
-import axios from "axios";
 import React, { useState, useRef } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AddDrawingFalse } from "../../store/slice/noteSlice";
 import DrawingCanvas, { type CanvasHandle } from "../common/Canvas";
-// import { BsPinAngleFill } from "react-icons/bs";
 import type { Note as note } from "../../types";
 import { IoIosSave, IoMdClose } from "react-icons/io";
 import { useHandleEvents } from "../../hooks/useHandleEvents";
 import { BsPinAngleFill } from "react-icons/bs";
-
-// interface CreateDrawingProps {
-//   onCreateDrawing: (
-//     note: note,
-//     meta?: { tempId?: number; shouldRemove?: boolean },
-//   ) => void;
-// }
+import { api } from "../../api";
+import { saveGuestNote, updateGuestNote } from "../../utils/guestStorage";
+import type { RootState } from "../../store/store";
 
 interface CreateDrawingProps {
   note?: note | null;
@@ -41,6 +35,10 @@ const CreateDrawing: React.FC<CreateDrawingProps> = ({
   onToggleDrawing,
 }) => {
   const dispatch = useDispatch();
+
+  const { isGuest } = useSelector(
+    (state: RootState) => state.auth
+  );
   const [isClosing, setIsClosing] = useState(false);
   const [color, setColor] = useState("transparent");
   const [pinned, setPinned] = useState(false);
@@ -79,13 +77,18 @@ const CreateDrawing: React.FC<CreateDrawingProps> = ({
       };
       handleUpdate(updatedNote);
       closePopup();
-      try {
-        await axios.put(
-          `${import.meta.env.VITE_API_BASE}/notes/${note.id}`,
-          updatedNote,
-        );
-      } catch (error) {
-        console.error(error);
+      if (isGuest) {
+        updateGuestNote(updatedNote);
+      } else {
+        try {
+          await api.put(
+            `/notes/${note.id}`,
+            updatedNote,
+          );
+        } catch (error) {
+          console.error(error);
+        }
+
       }
     } else {
       const tempId = -Date.now();
@@ -102,16 +105,20 @@ const CreateDrawing: React.FC<CreateDrawingProps> = ({
       };
       handleOptimisticAdd(optimisticNote);
       closePopup();
-      try {
-        const { id: _, ...noteDataWithoutId } = optimisticNote;
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_BASE}/notes`,
-          noteDataWithoutId,
-        );
-        handleOptimisticAdd(response.data, { tempId });
-      } catch (error) {
-        handleOptimisticAdd(optimisticNote, { shouldRemove: true });
-        console.log(error);
+      if (isGuest) {
+        saveGuestNote(optimisticNote);
+      } else {
+        try {
+          const { id: _, ...noteDataWithoutId } = optimisticNote;
+          const response = await api.post(
+            `/notes`,
+            noteDataWithoutId,
+          );
+          handleOptimisticAdd(response.data, { tempId });
+        } catch (error) {
+          handleOptimisticAdd(optimisticNote, { shouldRemove: true });
+          console.log(error);
+        }
       }
     }
   };

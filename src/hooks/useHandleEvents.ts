@@ -6,10 +6,13 @@ import {
   deleteNoteOptimistic,
   updateNoteOptimistic
 } from '../store/slice/noteSlice';
-import axios from 'axios';
+import { api } from '../api';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../store/store';
 
 export function useHandleEvents() {
   const dispatch = useDispatch();
+  const isGuest = useSelector((state: RootState) => state.auth.isGuest);
 
   const handleOptimisticAdd = (noteData: note, meta?: { tempId?: number; shouldRemove?: boolean }) => {
     if (meta?.shouldRemove) {
@@ -23,11 +26,13 @@ export function useHandleEvents() {
 
   const handleDelete = async (id: number) => {
     dispatch(deleteNoteOptimistic(id));
-    try {
-      await axios.delete(`${import.meta.env.VITE_API_BASE}/notes/${id}`);
-    } catch (error) {
-      console.log("Delete failed reverting UI", error);
-      // If delete fails, you can trigger a full refetch to sync safely
+    if (!isGuest) {
+      try {
+        await api.delete(`/notes/${id}`);
+      } catch (error) {
+        console.log("Delete failed reverting UI", error);
+        // If delete fails, you can trigger a full refetch to sync safely
+      }
     }
   };
 

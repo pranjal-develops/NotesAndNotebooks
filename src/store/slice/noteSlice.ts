@@ -49,6 +49,9 @@ export const noteSlice = createSlice({
     setNotes: (state, action: PayloadAction<Note[]>) => {
       state.notes = action.payload;
     },
+    loadGuestNotes: (state, action: PayloadAction<Note[]>) => {
+      state.notes = action.payload;
+    },
     addOptimisticNote: (state, action: PayloadAction<Note>) => {
       state.notes.unshift(action.payload); // Immer lets you use "push/unshift" safely!
     },
@@ -94,6 +97,7 @@ export const {
   AddDrawingTrue,
   AddDrawingFalse,
   setNotes,
+  loadGuestNotes,
   setSelectedTag,
   NotesLoadingFalse,
   NotesLoadingTrue,

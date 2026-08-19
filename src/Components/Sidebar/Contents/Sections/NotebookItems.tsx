@@ -35,12 +35,11 @@ const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
   return (
     <div key={notebook.id}>
       {/* Notebook Item */}
-      <button
-        className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-          activeNotebook?.id === notebook.id
+      <div
+        className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeNotebook?.id === notebook.id
             ? "bg-(--accent-color-light) text-(--accent-color)"
             : "text-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800 dark-island:hover:bg-zinc-800 pitch-black:hover:bg-zinc-800"
-        }`}
+          }`}
       >
         <div className="flex items-center gap-3">
           <button
@@ -59,20 +58,18 @@ const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
               />
             ) : expandedNotebooks[notebook.id] ? (
               <LuNotebookPen
-                className={`text-(--accent-color) transition-opacity ${
-                  activeNotebook?.id === notebook.id
+                className={`text-(--accent-color) transition-opacity ${activeNotebook?.id === notebook.id
                     ? "opacity-100"
                     : "opacity-50"
-                }`}
+                  }`}
                 size={18}
               />
             ) : (
               <LuNotebookText
-                className={`text-(--accent-color) transition-opacity ${
-                  activeNotebook?.id === notebook.id
+                className={`text-(--accent-color) transition-opacity ${activeNotebook?.id === notebook.id
                     ? "opacity-100"
                     : "opacity-50"
-                }`}
+                  }`}
                 size={18}
               />
             )}
@@ -80,10 +77,10 @@ const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
           <Link
             to={`/notebooks/${notebook.id}`}
             onClick={() => handlePageClick()}
-           className="truncate">{notebook.name}
-           </Link>
+            className="truncate">{notebook.name}
+          </Link>
         </div>
-      </button>
+      </div>
 
       {/* Nested Pages (Accordion Content) */}
       {expandedNotebooks[notebook.id] && (
@@ -93,15 +90,14 @@ const NotebookItems = ({ notebook }: { notebook: Notebook }) => {
               key={page.id}
               onClick={() => handlePageClick()}
               to={`/notebooks/${notebook.id}/pages/${page.id}`}
-              className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md transition-colors hover:text-(--accent-color) ${
-                activePage?.id === page.id
+              className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md transition-colors hover:text-(--accent-color) ${activePage?.id === page.id
                   ? "text-(--accent-color) bg-(--accent-color-light)"
                   : "text-zinc-500"
-              }`}
+                }`}
             >
               <BsFileEarmarkText size={14} />
               <span className="truncate">{page.title}
-               </span>
+              </span>
             </Link>
           ))}
           <Link

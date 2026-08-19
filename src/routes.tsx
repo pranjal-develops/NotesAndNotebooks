@@ -5,6 +5,8 @@ import CreateNotebook from "./Components/CreateNotebook";
 import PageContainer from "./Components/Notebooks/PageContainer";
 import Notebook from "./Components/Notebooks/Notebook";
 import EditNotebook from "./Components/Notebooks/EditNotebook";
+import Login from "./Pages/Login";
+import Register from "./Pages/Register";
 
 export const router = createBrowserRouter([
   {
@@ -41,6 +43,14 @@ export const router = createBrowserRouter([
       },
     ],
   },
-],{
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
+  }
+], {
   basename: "/NotesAndNotebooks"
 });

@@ -63,9 +63,9 @@ export interface PageDTO {
 }
 
 // export interface HomeContext {
-  // notes: Note[],
-  // loading: boolean,
-  // setEditingnote: React.Dispatch<React.SetStateAction<note | null>>;
+// notes: Note[],
+// loading: boolean,
+// setEditingnote: React.Dispatch<React.SetStateAction<note | null>>;
 // }
 
 export interface DrawingDto {
@@ -77,4 +77,11 @@ export interface DrawingDto {
   pinned?: boolean;
   tags?: string[];
   drawing?: boolean;
+}
+
+
+export interface User {
+  id: number;
+  username: string;
+  pfp: string | null;
 }

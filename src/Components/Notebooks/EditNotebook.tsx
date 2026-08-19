@@ -10,12 +10,17 @@ import {
   setActiveNotebook,
   setNotebooks,
 } from "../../store/slice/notebookSlice";
+import { getGuestNotebookById, updateGuestNotebook, getGuestNotebooks } from "../../utils/guestStorage";
+
+// Inside EditNotebook component, alongside other hooks:
+
 
 const EditNotebook = () => {
   const { notebookId } = useParams<{ notebookId: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { activeNotebook } = useSelector((state: RootState) => state.notebook);
+  const isGuest = useSelector((state: RootState) => state.auth.isGuest);
   const [loading, setLoading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [title, setTitle] = useState<string>("Notebook Name");
@@ -50,12 +55,21 @@ const EditNotebook = () => {
     setDraggedIndex(null);
     if (!notebookId || !pages) return;
     try {
-      const pageIds = pages.map((p) => p.id);
-      await notebookApi.reorderPages(parseInt(notebookId), { pageIds });
+      if (isGuest) {
+        const notebook = getGuestNotebookById(parseInt(notebookId));
+        if (notebook) {
+          notebook.pages = pages.map((p, index) => ({ ...p, pageOrder: index }));
+          updateGuestNotebook(notebook);
+        }
+      } else {
+        const pageIds = pages.map((p) => p.id);
+        await notebookApi.reorderPages(parseInt(notebookId), { pageIds });
+      }
     } catch (error) {
       console.error("Failed to persist page order:", error);
     }
   };
+
 
   const PRESETS = [
     { name: "Purple", value: "#8b5cf6" },
@@ -90,26 +104,27 @@ const EditNotebook = () => {
     try {
       const payload = {
         name: title,
-        description: description,
-        color: color,
-        logo: logo || "", // Empty string workaround to clear the logo
+        description,
+        color,
+        logo: logo || "",
       };
 
-      // Update notebook on backend
-      const response = await notebookApi.updateNotebook(
-        parseInt(notebookId),
-        payload,
-      );
-
-      // Update active notebook in Redux
-      dispatch(setActiveNotebook(response.data));
-
-      // Refresh the full list of notebooks for sidebar
-      const listResponse = await notebookApi.getAll();
-      dispatch(setNotebooks(listResponse.data));
-
-      // Redirect back to the Notebook detail page
-      navigate(`/notebooks/${notebookId}`);
+      if (isGuest) {
+        const notebook = getGuestNotebookById(parseInt(notebookId));
+        if (notebook) {
+          const updatedNotebook = { ...notebook, ...payload };
+          updateGuestNotebook(updatedNotebook);
+          dispatch(setActiveNotebook(updatedNotebook));
+          dispatch(setNotebooks(getGuestNotebooks()));
+        }
+        navigate(`/notebooks/${notebookId}`);
+      } else {
+        const response = await notebookApi.updateNotebook(parseInt(notebookId), payload);
+        dispatch(setActiveNotebook(response.data));
+        const listResponse = await notebookApi.getAll();
+        dispatch(setNotebooks(listResponse.data));
+        navigate(`/notebooks/${notebookId}`);
+      }
     } catch (error) {
       console.error("Failed to save notebook:", error);
       alert("Failed to save changes. Please try again.");
@@ -118,21 +133,36 @@ const EditNotebook = () => {
     }
   };
 
+
   useEffect(() => {
     if (notebookId) {
       setLoading(true);
-      notebookApi.getById(parseInt(notebookId)).then((response) => {
-        const data = response.data;
-        setTitle(data.name || "Notebook Name");
-        setDescription(data.description || "Notebook Description");
-        setLogo(data.logo);
-        setColor(data.color || "#8b5cf6");
-        setInitialColor(data.color || "#8b5cf6");
-        setPages(data.pages);
+      if (isGuest) {
+        const notebook = getGuestNotebookById(parseInt(notebookId));
+        if (notebook) {
+          setTitle(notebook.name || "Notebook Name");
+          setDescription(notebook.description || "Notebook Description");
+          setLogo(notebook.logo);
+          setColor(notebook.color || "#8b5cf6");
+          setInitialColor(notebook.color || "#8b5cf6");
+          setPages(notebook.pages);
+        }
         setLoading(false);
-      });
+      } else {
+        notebookApi.getById(parseInt(notebookId)).then((response) => {
+          const data = response.data;
+          setTitle(data.name || "Notebook Name");
+          setDescription(data.description || "Notebook Description");
+          setLogo(data.logo);
+          setColor(data.color || "#8b5cf6");
+          setInitialColor(data.color || "#8b5cf6");
+          setPages(data.pages);
+          setLoading(false);
+        });
+      }
     }
-  }, [notebookId]);
+  }, [notebookId, isGuest]);
+
 
   // Create refs to hold the latest values
   const isSavingRef = useRef(isSaving);
@@ -280,11 +310,10 @@ const EditNotebook = () => {
                 key={c.value}
                 type="button"
                 onClick={() => handleColorChange(c.value)}
-                className={`w-10 h-10 rounded-xl transition-all transform hover:scale-110 ${
-                  color === c.value
+                className={`w-10 h-10 rounded-xl transition-all transform hover:scale-110 ${color === c.value
                     ? "ring-4 ring-(--accent-color)/30 scale-110 border-2 border-white dark:border-zinc-900 dark-island:border-zinc-900 pitch-black:border-zinc-900 shadow-md"
                     : "border border-zinc-200 dark:border-zinc-700 dark-island:border-zinc-700 pitch-black:border-zinc-700"
-                }`}
+                  }`}
                 style={{ backgroundColor: c.value }}
                 title={c.name}
               />
@@ -326,11 +355,10 @@ const EditNotebook = () => {
                   onDragStart={(e) => handleDragStart(e, index)}
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDragEnd={handleDragEnd}
-                  className={`flex items-center justify-between gap-3 bg-white dark:bg-zinc-800 dark-island:bg-zinc-800 pitch-black:bg-zinc-800 px-4 py-2 rounded-xl border-2 border-zinc-50 dark:border-zinc-700 dark-island:border-zinc-700 pitch-black:border-zinc-700 group cursor-grab active:cursor-grabbing transition-all duration-200 ${
-                    draggedIndex === index
+                  className={`flex items-center justify-between gap-3 bg-white dark:bg-zinc-800 dark-island:bg-zinc-800 pitch-black:bg-zinc-800 px-4 py-2 rounded-xl border-2 border-zinc-50 dark:border-zinc-700 dark-island:border-zinc-700 pitch-black:border-zinc-700 group cursor-grab active:cursor-grabbing transition-all duration-200 ${draggedIndex === index
                       ? "opacity-40 border-dashed border-(--accent-color)"
                       : ""
-                  }`}
+                    }`}
                 >
                   <span className="text-zinc-700 dark:text-zinc-300 dark-island:text-zinc-300 pitch-black:text-zinc-300 flex items-center gap-3 min-w-0 pointer-events-none">
                     <span className="text-xs font-mono text-zinc-400 shrink-0">
