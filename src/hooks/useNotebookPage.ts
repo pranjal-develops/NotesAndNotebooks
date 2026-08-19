@@ -2,17 +2,16 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { notebookApi } from "../api";
 import { convertHtmlToMarkdown, downloadMarkdown, convertMarkdownToHtml } from "../utils/markdownExport";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import type { RootState } from "../store/store";
-import { setActiveNotebook, setNotebooks } from "../store/slice/notebookSlice";
-import { getGuestNotebookById, updateGuestNotebook, getGuestNotebooks } from "../utils/guestStorage";
+// import { setActiveNotebook, setNotebooks } from "../store/slice/notebookSlice";
+import { getGuestNotebookById, updateGuestNotebook, } from "../utils/guestStorage";
 
 
 export function useNotebookPage() {
     const { notebookId, pageId } = useParams<{ notebookId: string; pageId: string }>();
     const navigate = useNavigate();
     const isGuest = useSelector((state: RootState) => state.auth.isGuest);
-    const dispatch = useDispatch();
     const [title, setTitle] = useState("Untitled");
     const [contentHtml, setContentHtml] = useState("");
     const [loading, setLoading] = useState(!!pageId);
