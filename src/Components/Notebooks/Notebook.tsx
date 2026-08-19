@@ -4,6 +4,9 @@ import { notebookApi } from "../../api";
 import type { PageSummary } from "../../types";
 import { Button, Card, Skeleton } from "../../Components/ui/Primitives";
 import { BsTrash } from "react-icons/bs";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store/store";
+import { getGuestNotebookById } from "../../utils/guestStorage";
 
 const Notebook = () => {
   const { notebookId } = useParams<{ notebookId: string }>();
@@ -12,18 +15,28 @@ const Notebook = () => {
   const [description, setDescription] = useState<string>("Description");
   const [logo, setLogo] = useState<string | null>();
   const [pages, setPages] = useState<PageSummary[]>();
-
+  const isGuest = useSelector((state: RootState) => state.auth.isGuest);
   useEffect(() => {
     if (notebookId) {
       setLoading(true);
-      notebookApi.getById(parseInt(notebookId)).then((response) => {
-        const data = response.data;
-        setTitle(data.name || "Notebook Name");
-        setDescription(data.description || "Notebook Description");
-        setLogo(data.logo);
-        setPages(data.pages);
+      if (isGuest) {
+        const notebook = getGuestNotebookById(Number.parseInt(notebookId));
+        setTitle(notebook.name || "Notebook Name");
+        setDescription(notebook.description || "Notebook Description");
+        setLogo(notebook.logo);
+        setPages(notebook.pages);
         setLoading(false);
-      });
+      } else {
+        notebookApi.getById(Number.parseInt(notebookId)).then((response) => {
+          const data = response.data;
+          setTitle(data.name || "Notebook Name");
+          setDescription(data.description || "Notebook Description");
+          setLogo(data.logo);
+          setPages(data.pages);
+          setLoading(false);
+        });
+
+      }
     }
   }, [notebookId]);
 

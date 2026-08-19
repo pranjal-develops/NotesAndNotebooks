@@ -19,6 +19,9 @@ const notebookSlice = createSlice({
     name: 'notebooks',
     initialState,
     reducers: {
+        loadGuestNotebooks: (state, action: PayloadAction<Notebook[]>) =>{
+            state.notebooks = action.payload;
+        },
         setNotebooks: (state, action: PayloadAction<Notebook[]>) =>{
             state.notebooks = action.payload;
         },
@@ -34,5 +37,5 @@ const notebookSlice = createSlice({
     }
 });
 
-export const {setNotebooks, setActiveNotebook, setActivePage, setLoading} = notebookSlice.actions;
+export const {setNotebooks, setActiveNotebook, setActivePage, setLoading, loadGuestNotebooks} = notebookSlice.actions;
 export default notebookSlice.reducer;

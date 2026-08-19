@@ -1,10 +1,12 @@
-import axios from 'axios'
 import React, { useState, useRef } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { AddNoteFalse } from '../../store/slice/noteSlice';
 import DrawingCanvas, { type CanvasHandle } from '../common/Canvas';
 import { BsPinAngleFill } from 'react-icons/bs';
 import { useHandleEvents } from '../../hooks/useHandleEvents';
+import { api } from '../../api';
+import { saveGuestNote } from '../../utils/guestStorage';
+import type { RootState } from '../../store/store';
 
 // interface AddProps {
 //   handleOptimisticAdd: (note: note, meta?: { tempId?: number; shouldRemove?: boolean }) => void;
@@ -26,6 +28,7 @@ const COLORS = [
 // const Add: React.FC<AddProps> = ({ handleOptimisticAdd }) => {
 const Add = () => {
   const dispatch = useDispatch();
+  const isGuest = useSelector((state: RootState) => state.auth.isGuest);
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [isClosing, setIsClosing] = useState(false)
@@ -34,7 +37,7 @@ const Add = () => {
   const [pinned, setPinned] = useState(false);
   const [tagInput, setTagInput] = useState("")
   const [tags, setTags] = useState<string[]>([]);
-  const {handleOptimisticAdd} = useHandleEvents();
+  const { handleOptimisticAdd } = useHandleEvents();
 
   const addTag = (e: React.KeyboardEvent) => {
     if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
@@ -69,15 +72,21 @@ const Add = () => {
     };
     handleOptimisticAdd(optimisticNote);
     closePopup();
-    try {
-      // Send to server WITHOUT the temp ID
-      const { id: _, ...noteDataWithoutId } = optimisticNote;
-      const response = await axios.post(`${import.meta.env.VITE_API_BASE}/notes`, noteDataWithoutId);
-      // Swap temp note with real note from server (which has the real DB ID)
-      handleOptimisticAdd(response.data, { tempId });
-    } catch (error) {
-      handleOptimisticAdd(optimisticNote, { shouldRemove: true });
-      console.log(error);
+    if (isGuest) {
+      saveGuestNote(optimisticNote);
+    } else {
+
+      try {
+        // Send to server WITHOUT the temp ID
+        const { id: _, ...noteDataWithoutId } = optimisticNote;
+        const response = await api.post(`/notes`, noteDataWithoutId);
+        // Swap temp note with real note from server (which has the real DB ID)
+        handleOptimisticAdd(response.data, { tempId });
+      } catch (error) {
+        handleOptimisticAdd(optimisticNote, { shouldRemove: true });
+        console.log(error);
+      }
+
     }
   };
 

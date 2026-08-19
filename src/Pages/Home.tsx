@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import Navbar from "../Components/common/Navbar";
+import Navbar from "../Components/common/Navbar/Navbar";
 import Sidebar from "../Components/Sidebar/Sidebar";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store/store";

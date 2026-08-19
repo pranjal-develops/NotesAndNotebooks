@@ -1,9 +1,12 @@
 import React, { useRef, useState } from "react";
-import axios from "axios";
 import DrawingCanvas, { type CanvasHandle } from ".././common/Canvas";
 import type { Note as NoteType } from '../../types';
 import { BsPinAngleFill } from "react-icons/bs";
 import { useHandleEvents } from "../../hooks/useHandleEvents";
+import { api } from "../../api";
+import { updateGuestNote } from "../../utils/guestStorage";
+import type { RootState } from "../../store/store";
+import { useSelector } from "react-redux";
 
 interface EditPopupProps {
   note: NoteType;
@@ -25,6 +28,9 @@ const COLORS = [
 ];
 
 const EditPopup: React.FC<EditPopupProps> = ({ note, onClose, onToggleDrawing }) => {
+  const { isGuest } = useSelector(
+    (state: RootState) => state.auth
+  );
   const [title, setTitle] = useState(note.title);
   const [description, setDescription] = useState(note.description);
   const [isClosing, setIsClosing] = useState(false)
@@ -61,9 +67,12 @@ const EditPopup: React.FC<EditPopupProps> = ({ note, onClose, onToggleDrawing })
     onClose(); // Close the popup after updating
 
     try {
-      const response = await axios.put(`${import.meta.env.VITE_API_BASE}/notes/${note.id}`, updatednote);
-      console.log(response);
-
+      if (isGuest) {
+        updateGuestNote(updatednote);
+      } else {
+        const response = await api.put(`/notes/${note.id}`, updatednote);
+        console.log(response);
+      }
     } catch (error) {
       console.log("Update failed reverting...", error);
       handleUpdate(previousNotes);

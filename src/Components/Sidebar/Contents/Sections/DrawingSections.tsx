@@ -1,10 +1,10 @@
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../../store/store";
 import { setNotes, setSelectedTag, setViewingDrawings } from "../../../../store/slice/noteSlice";
-import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BsSticky } from "react-icons/bs";
 import type { DrawingDto } from "../../../../types";
+import { api } from "../../../../api";
 
 const DrawingSections = () => {
   const dispatch = useDispatch();
@@ -21,7 +21,7 @@ const DrawingSections = () => {
   const handleAllDrawingsClick = async () => {
     dispatch(setViewingDrawings(true));
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_BASE}/notes/drawings`);
+      const response = await api.get(`/notes/drawings`);
 
       const fetchedDrawings = response.data.map((d: DrawingDto) => ({
         id: d.id,

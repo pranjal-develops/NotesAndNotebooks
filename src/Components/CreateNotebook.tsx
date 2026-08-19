@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setNotebooks } from '../store/slice/notebookSlice';
 import { SetTempAccentColor } from '../store/slice/uiSlice';
 import { notebookApi } from '../api';
 import { BsArrowLeft, BsJournalText, BsPlusLg, BsTrash } from 'react-icons/bs';
 import { Link, useNavigate } from "react-router-dom"
+import { getGuestNotebooks, saveGuestNotebook } from '../utils/guestStorage';
+import type { RootState } from '../store/store';
 
 const COLORS = [
   { name: 'Purple', value: '#8b5cf6' },
@@ -24,6 +26,10 @@ const CreateNotebook = () => {
   const [pageTitle, setPageTitle] = useState("");
   const [pendingPages, setPendingPages] = useState<string[]>([]);
   const navigate = useNavigate();
+
+  const { isGuest } = useSelector(
+    (state: RootState) => state.auth
+  );
 
   // Keep Redux tempAccentColor in sync with local selected color state
   useEffect(() => {
@@ -63,9 +69,14 @@ const CreateNotebook = () => {
 
     setIsSubmitting(true);
     try {
-      await notebookApi.createNotebook(payload);
-      const response = await notebookApi.getAll();
-      dispatch(setNotebooks(response.data));
+      if (isGuest) {
+        saveGuestNotebook({ ...payload, pages: payload.pages.map((p) => ({ ...p, id: -Date.now() + Math.random() })), id: -Date.now() });
+        dispatch(setNotebooks(getGuestNotebooks()));
+      } else {
+        await notebookApi.createNotebook(payload);
+        const response = await notebookApi.getAll();
+        dispatch(setNotebooks(response.data));
+      }
       navigate("/notes")
     } catch (error) {
       console.error("Failed to create notebook", error);
